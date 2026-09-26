@@ -1,137 +1,66 @@
 ---
 name: implementation-planning
-description: Convert an approved requirement and architecture boundary into one or more executable implementation units. Prefer small vertical slices, explicit dependencies, acceptance evidence, and risk-first ordering while stopping before implementation detail is pre-written in prose.
+description: Use when approved requirements and architecture need to become one or more executable implementation units, especially when work is too large for one reviewable change, has real dependencies, or needs risk-first sequencing before Arena dispatch.
 ---
 
 # Implementation Planning
 
-## Canonical execution contract
-
-For Arena-dispatched product work, the canonical Issue contract and lifecycle live in:
-
-`../../execution/arena-dispatch.md`
-
-Read that file before producing an Arena plan.
-
-This skill supplies decomposition and planning mechanics. It does not replace the Issue contract.
-
 ## Purpose
 
-Plan only until approved work is safe and executable.
+Plan until the work is executable, then stop.
 
-The planner should decide what the implementer cannot safely infer:
+Decide the outcome, scope, constraints, acceptance, real dependencies, sequencing, and verification an implementer cannot safely infer. Preserve local implementation judgment.
 
-- objective;
-- scope;
-- constraints;
-- acceptance boundary;
-- dependencies;
-- sequencing that genuinely matters;
-- verification expectations;
-- contract exceptions.
+## Authority
 
-The planner should not write the implementation in prose.
-
-## Use when
-
-Use this skill when:
-
-- accepted requirements need to become executable work;
-- a project/feature is too large for one reviewable implementation unit;
-- dependencies or blockers need ordering;
-- work should be sliced into small vertical increments;
-- risk or uncertainty should be moved earlier;
-- an Arena Issue contract needs to be prepared.
-
-Do not use it to re-decide requirements or architecture already accepted.
+For Arena-dispatched product work, read `../../execution/arena-dispatch.md`. It owns Issue structure, dispatch eligibility, branch/PR lifecycle, contract exceptions, review, acceptance, and merge boundaries.
 
 ## Workflow
 
 ### 1. Load the accepted contract
 
-Read the authoritative:
+Use authoritative requirements, architecture, security constraints, non-goals, project artifacts, and verification strategy.
 
-- objective and requirements;
-- architecture constraints;
-- security constraints;
-- non-goals;
-- relevant project artifacts;
-- verification strategy;
-- current project state only to the extent needed.
+Do not plan from chat summaries when repository artifacts own the decision.
 
-Do not plan from chat summaries when canonical repository artifacts exist.
+### 2. Decide whether the work fits one unit
 
-### 2. Decide whether the work fits one implementation unit
+A unit should have:
 
-A sensible implementation unit should:
+- one coherent objective;
+- one sensible reviewable branch/PR;
+- observable acceptance criteria;
+- a valid end state;
+- no need for the implementer to invent project-level decomposition.
 
-- have one coherent objective;
-- fit one reviewable branch/PR;
-- have observable acceptance criteria;
-- leave the repository in a valid state;
-- not require the implementer to invent project-level decomposition.
-
-If not, decompose before dispatch.
+Split larger work before dispatch.
 
 ### 3. Prefer vertical slices
 
-A vertical slice delivers a narrow, complete behavior through the layers it genuinely needs.
-
-Prefer:
-
-`small end-to-end capability → verify → next capability`
-
-over:
-
-`all database → all backend → all frontend → integrate at end`
-
-unless the work is inherently a wide mechanical migration.
+Prefer a narrow complete capability through the layers it actually needs over horizontal "all database / all API / all UI" phases.
 
 Each slice should be independently demonstrable or verifiable where practical.
 
-### 4. Model real dependencies
+For inherently wide migrations, use a compatible expand → migrate → contract sequence instead of fake vertical slices.
 
-For each proposed unit, identify blockers.
+### 4. Model real dependency edges
 
-A dependency exists only when the later unit cannot safely begin or complete without the earlier one.
+A blocker exists only when later work cannot safely begin or complete without earlier work.
 
-Do not make everything sequential merely because the plan is written in order.
+Identify independent frontier work rather than making list order imply dependency.
 
-Identify a frontier of work that can proceed independently.
+### 5. Move material risk early
 
-### 5. Handle wide migrations explicitly
+Schedule the cheapest proof of a dangerous assumption before investing in dependent work: integration spike, migration proof, benchmark, compatibility check, or similar evidence.
 
-Some changes cannot be green as ordinary vertical slices because one contract is used everywhere.
+Do not build speculative infrastructure merely to "de-risk" hypotheticals.
 
-For these, use an expand-migrate-contract shape where appropriate:
+### 6. Define each unit by outcome
 
-1. introduce compatible new form;
-2. migrate consumers in bounded batches;
-3. verify zero remaining consumers;
-4. remove old form.
-
-Do not force a cross-repository rename or shared-schema migration into fake vertical slices.
-
-### 6. Put risk early
-
-Move uncertainty forward when failure would invalidate later work.
-
-Examples:
-
-- prove an external integration;
-- validate a migration strategy;
-- benchmark a critical performance assumption;
-- prove a security or platform constraint;
-- establish a required compatibility seam.
-
-Risk-first does not mean building speculative infrastructure. It means testing the assumption that could sink the plan.
-
-### 7. Define each unit by outcome, not file list
-
-For each implementation unit, define:
+For each unit, define:
 
 - objective;
-- what it delivers;
+- context/authority;
 - scope;
 - out of scope;
 - constraints;
@@ -140,119 +69,47 @@ For each implementation unit, define:
 - dependencies;
 - contract exceptions.
 
-File paths may be included when they are authoritative and useful, but they are not the planning unit.
+Use file paths only when they add durable execution context.
 
-Avoid brittle plans that prescribe every function body before implementation begins.
+### 7. Stop at executable
 
-### 8. Make handoff self-contained
+A capable implementer should be able to choose local code structure while remaining inside the contract.
 
-The implementer should not need prior chat history to understand the unit.
+If the plan starts prescribing function bodies or line-by-line edits that the implementation can decide safely, stop.
 
-Point to canonical repository references rather than copying entire documents.
-
-Include enough context to understand why constraints exist.
-
-Do not paste the whole project state into every Issue.
-
-### 9. Stop at executable
-
-Planning is complete when the next unit can be implemented safely without project-level invention.
-
-Do not continue until the plan resembles code.
-
-A useful test:
-
-> Could a capable implementer make local implementation choices while remaining inside the contract?
-
-If yes, stop planning.
-
-### 10. Produce the Arena Issue contract when applicable
-
-For Arena work, use exactly the canonical sections from `../../execution/arena-dispatch.md`:
-
-- Objective
-- Context & Authority
-- Scope
-- Out of Scope
-- Constraints
-- Acceptance Criteria
-- Verification
-- Contract Exceptions
-
-One Issue maps to one Arena branch and one PR.
-
-If multiple Issues are needed, each should still be independently coherent.
-
-## Planning heuristics
-
-Prefer units that:
-
-- fit a focused implementation context;
-- can be reviewed without reconstructing the entire project;
-- have few acceptance criteria with high signal;
-- keep unrelated refactoring out;
-- preserve working state;
-- expose blockers early.
-
-Avoid arbitrary rules such as "five files maximum" when the project shape makes that meaningless.
+For Arena work, render the final unit using the exact Issue contract sections in `../../execution/arena-dispatch.md`.
 
 ## Output contract
 
-### Decomposition
+Produce:
 
-The ordered or partially ordered implementation units.
+- the implementation units;
+- genuine dependency edges;
+- risk-first proof work where required;
+- a bounded execution contract per unit;
+- intentionally deferred follow-up work.
 
-### Dependency Edges
+For Arena, one Issue maps to one branch and one PR.
 
-Which units genuinely block which others.
+## Boundaries
 
-### Risk-First Work
+- Do not re-decide accepted requirements or architecture.
+- Do not create mandatory plan files or a shadow task store.
+- Do not default to horizontal technical-layer slicing.
+- Do not infer blockers from list order.
+- Do not hide unrelated cleanup inside the plan.
+- Do not pre-implement the solution in prose.
 
-Any spike/proof that must happen before ordinary implementation.
-
-### Per-Unit Contract
-
-For Arena, the canonical Issue contract.
-
-For non-Arena work, an equivalent bounded execution contract.
-
-### Deferred Work
-
-Valid follow-ups intentionally outside current scope.
-
-## Red flags
-
-- pseudo-code implementation masquerading as planning;
-- giant plan files duplicating the spec;
-- horizontal layer-by-layer slicing by default;
-- no acceptance evidence per unit;
-- dependencies inferred from list order rather than actual blocking;
-- planning unrelated cleanup into a feature;
-- one Issue containing several independently reviewable projects;
-- implementer expected to recover intent from previous chat;
-- planner resolving local implementation detail that the implementer can safely choose.
-
-## Completion check
+## Completion gate
 
 Before dispatch, confirm:
 
-- each implementation unit has one coherent outcome;
-- work fits one branch/PR per Arena Issue;
+- each unit has one coherent outcome;
+- each Arena unit fits one branch/PR;
 - dependencies are explicit and genuine;
 - vertical slicing was preferred where appropriate;
-- wide migrations use a safe compatible sequence where needed;
-- high-risk unknowns appear early;
+- material uncertainty appears early;
 - acceptance criteria are observable;
-- verification references project truth;
-- contract exceptions identify material decisions that must return to the control plane;
-- the plan stops before pre-implementing the solution.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- addyosmani/agent-skills — `skills/planning-and-task-breakdown/SKILL.md` — `planning-and-task-breakdown` — MIT
-- obra/superpowers — `skills/writing-plans/SKILL.md` — `writing-plans` — MIT
-- mattpocock/skills — `skills/engineering/to-tickets/SKILL.md` — `to-tickets` — MIT
-
-This is an Anthracite-specific rewrite. Mandatory local plan files, tracker configuration, worktree/subagent requirements, exact code-step transcripts, and foreign task-storage conventions are intentionally not inherited.
+- verification points to project truth;
+- contract exceptions return material decisions to the control plane;
+- the plan stops at executable.
