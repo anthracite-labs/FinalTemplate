@@ -1,235 +1,130 @@
 ---
 name: project-bootstrap
-description: Operationalize FinalTemplate's canonical project bootstrap and reconciliation procedure. Establish missing foundations deliberately, preserve valid existing choices, surface inconsistencies, and make quality and repository governance executable without creating shadow project state.
+description: Use when turning FinalTemplate into a real greenfield project, adopting an existing repository into this control plane, reconciling a partial setup, or repairing inconsistent project foundations before normal engineering proceeds.
 ---
 
 # Project Bootstrap
 
-## Canonical owner
-
-The canonical bootstrap and reconciliation procedure is:
-
-`../../bootstrap/project.md`
-
-Read and follow that file first.
-
-This skill does not replace or duplicate that procedure. It supplies the operating method used while executing it.
-
-If this skill and `../../bootstrap/project.md` ever conflict, the bootstrap procedure wins.
-
 ## Purpose
 
-Turn a blank, partial, or adopted repository into a usable project foundation without normalizing it back into the template.
+Operationalize the canonical bootstrap procedure without creating shadow project state.
 
-Bootstrap should leave real project artifacts owning real project facts.
+Greenfield work decides missing foundations deliberately. Brownfield work discovers and preserves valid existing choices.
 
-It must not create a parallel project profile, permanent bootstrap report, or framework-specific shadow state.
+## Authority
 
-## Use when
+Read and follow `../../bootstrap/project.md`. It owns bootstrap policy and the ESTABLISHED / MISSING / INCONSISTENT / NEEDS DECISION model.
 
-Use this skill when:
-
-- turning FinalTemplate into a real new project;
-- adopting an existing repository into this control plane;
-- reconciling a partially bootstrapped project;
-- repairing inconsistent foundation choices before normal engineering proceeds.
-
-Do not use it for ordinary feature work after the project foundation is established.
-
-## Operating principles
-
-### Greenfield: decide deliberately
-
-An empty repository cannot reveal choices that do not exist.
-
-For greenfield work, establish project choices explicitly from accepted requirements, architecture, feasibility evidence, and human decisions.
-
-Do not infer a stack because it is popular.
-
-### Brownfield: discover before deciding
-
-For an existing repository, inspect real artifacts before asking or changing anything.
-
-Preserve valid established choices.
-
-Bootstrap establishes missing foundations; it does not normalize a real project back into the template.
-
-### Every fact has an owner
-
-Examples:
-
-- runtime and dependencies → manifests and lockfiles;
-- build/test/lint commands → real project scripts/configuration;
-- CI behavior → workflow/provider configuration;
-- deployment → actual deployment configuration;
-- repository enforcement → GitHub/provider settings;
-- project purpose and usage → actual project documentation.
-
-The control plane points to project truth. It does not become project truth.
+This skill supplies the operating method. If they conflict, the canonical bootstrap procedure wins.
 
 ## Workflow
 
 ### 1. Classify current foundations
 
-For each relevant foundation, classify it using the canonical four states:
+Inspect the repository before changing it.
+
+Classify each relevant foundation as:
 
 - **ESTABLISHED**
 - **MISSING**
 - **INCONSISTENT**
 - **NEEDS DECISION**
 
-Do not change an ESTABLISHED choice merely to match a preferred template convention.
+Do not normalize an established project back toward the template.
 
-### 2. Establish identity and scope
+### 2. Establish identity and accepted technology choices
 
-Ensure the actual project has enough identity to operate:
+Use accepted discovery, requirements, architecture, and feasibility decisions to establish only what the project needs:
 
-- name;
-- purpose;
-- intended users/consumers;
-- scope and non-goals;
-- relationship to other systems when material.
-
-Replace template-facing README content with project-facing content when the project is established.
-
-### 3. Reconcile technology choices
-
-Use accepted architecture and project constraints to establish only what is needed:
-
-- language/runtime;
-- framework;
-- dependency/package manager;
-- lockfile strategy;
-- build system;
+- project identity and purpose;
+- language/runtime/framework;
+- package/dependency manager and locking;
 - source/test layout;
-- persistence/data approach;
+- build system;
+- persistence/data choices;
 - generated artifacts.
 
-Do not choose technology merely because bootstrap needs something to write.
+For greenfield work, ask or rely on accepted decisions. Do not infer a stack because it is common.
 
-### 4. Create the smallest runnable baseline
+### 3. Create the smallest usable baseline
 
-Where applicable, establish a minimal state that can be:
+As applicable, make the project reproducibly installable/restorable, buildable, runnable/exercisable, testable, and statically checkable.
 
-- installed or restored reproducibly;
-- built or compiled;
-- started or exercised;
-- tested;
-- statically checked.
+Prefer a minimal real baseline over a large scaffold of unused choices.
 
-Prefer the smallest real baseline over a large scaffold full of unused choices.
+### 4. Put project facts in their real owners
 
-### 5. Establish an executable quality bar
+Examples:
 
-Translate accepted engineering constraints into project-owned checks where possible.
+- runtime/dependencies → manifests and lockfiles;
+- commands → project scripts/configuration;
+- CI → workflow/provider configuration;
+- deployment → deployment configuration;
+- repository enforcement → provider settings;
+- project purpose/usage → project documentation.
 
-Examples as applicable:
+Do not create a parallel project profile.
 
-- test command;
-- formatter check;
+### 5. Establish executable quality checks
+
+Create project-owned checks only where the project needs them, such as:
+
+- tests;
+- formatting;
 - lint/static analysis;
 - type checking;
 - build/compile;
 - generated-state verification;
-- security-specific checks;
-- accessibility or performance checks when part of the project contract.
+- security, accessibility, or performance checks when required.
 
-Do not encode a quality rule twice when one executable project check can own it.
+Prefer executable enforcement over duplicated prose.
 
-### 6. Establish ignore and environment handling from actual artifacts
+### 6. Add CI, governance, and release foundations conditionally
 
-Create ignore rules only for artifacts the chosen stack actually produces.
+Add CI only after local project commands exist.
 
-Define environment/configuration handling according to project need.
+Add issue/PR templates, labels, CODEOWNERS, rulesets, security settings, release automation, or deployment foundations only when the actual project needs them.
 
-Do not commit secrets.
+Prefer provider-native organization policy over copied repository files when it already enforces the requirement.
 
-Do not introduce a generic multi-language ignore file for a project that uses one stack.
+### 7. Verify the baseline
 
-### 7. Establish CI only after local project truth exists
+Follow `../../execution/verification.md`.
 
-CI should call the project's real commands.
+Bootstrap is not complete because files exist; required project-owned commands and foundational workflows need fresh evidence.
 
-Do not invent CI-only commands that developers cannot reproduce where practical.
+### 8. Reconcile durable state after acceptance
 
-Do not add generic workflows merely because they are common.
+After accepted bootstrap work lands on `main`, update `../../PROJECT_STATE.md` only if durable project reality changed.
 
-When provider-native organization policy already solves the problem, prefer it over copied repository files.
-
-### 8. Establish repository governance conditionally
-
-Determine whether the repository actually needs:
-
-- issue forms;
-- PR templates;
-- labels;
-- CODEOWNERS;
-- branch protections/rulesets;
-- required checks;
-- merge policy;
-- Actions permissions;
-- security settings.
-
-Repository governance is conditional, not a checklist.
-
-Enforcement belongs in the provider that enforces it.
-
-### 9. Establish release/deployment only when the project ships
-
-If the project deploys or publishes, define the minimum required:
-
-- artifact/version strategy;
-- target environment or registry;
-- secrets/environment handling;
-- deployment path;
-- rollback/recovery expectations.
-
-Libraries, experiments, internal tools, and deployable services may need different foundations.
-
-### 10. Verify the baseline
-
-Use `../../execution/verification.md`.
-
-A bootstrapped repository should have fresh evidence that its established project-owned commands and foundational workflows work.
-
-Do not claim a clean baseline from configuration inspection alone.
-
-### 11. Reconcile project state after acceptance
-
-Only after accepted bootstrap work lands on `main`, update `../../PROJECT_STATE.md` when durable project reality changed.
-
-Bootstrap activity itself is not state.
+Activity is not project state.
 
 ## Output contract
 
-Bootstrap is complete when:
+Bootstrap leaves:
 
-- required foundations are established or explicitly blocked on a decision;
-- contradictory foundation choices are resolved or surfaced;
-- the repository is a usable starting state for actual work;
-- project facts live in their real owning artifacts;
-- project-owned verification commands exist where applicable;
-- repository/provider governance is established only where needed;
-- no permanent bootstrap report or shadow project profile was created.
+- a usable project repository;
+- required foundations established or explicitly blocked on a decision;
+- project facts stored in their canonical artifacts;
+- executable project checks where applicable;
+- provider governance established only where needed;
+- no permanent bootstrap report or shadow project profile.
 
-## Red flags
+## Boundaries
 
-- copying a preferred stack into an empty repo without a decision;
-- rewriting an established brownfield structure to resemble the template;
-- storing package manager, build, or deployment facts in a second control-plane profile;
-- generic CI before local commands exist;
-- default CODEOWNERS, issue forms, labels, Dependabot, or release automation with no project need;
-- quality requirements that exist only as prose despite an obvious executable check;
-- creating `.gitignore` before the stack is known;
-- treating provider settings as Markdown policy instead of enforcing them at the provider;
-- writing PROJECT_STATE before the underlying work is accepted.
+- Do not choose a technology stack without an accepted basis.
+- Do not rewrite valid brownfield conventions to match the template.
+- Do not create generic CI, release, governance, or security files by default.
+- Do not duplicate provider settings in Markdown.
+- Do not update PROJECT_STATE before the underlying change is accepted.
 
-## Provenance
+## Completion gate
 
-Upstream mechanisms studied:
+Before handoff, confirm:
 
-- tomzx/agents — `skills/create-project/SKILL.md` — `create-project` — MIT
-- github/awesome-copilot — `skills/repo-standardizer/SKILL.md` — `repo-standardizer` — MIT
-- addyosmani/agent-skills — `skills/constraint-driven-development/SKILL.md` — `constraint-driven-development` — MIT
-
-This is a substantial Anthracite rewrite. The canonical bootstrap procedure remains `../../bootstrap/project.md`; upstream `.sdlc`, GitHub-standardization defaults, and separate project-profile assumptions are intentionally not inherited.
+- required foundations are ESTABLISHED or explicitly blocked;
+- inconsistencies are resolved or surfaced;
+- the repository is usable for actual work;
+- project facts live in their real owners;
+- required baseline checks have fresh evidence;
+- no shadow bootstrap/state artifact was created.
