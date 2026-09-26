@@ -1,191 +1,131 @@
 ---
 name: pr-integration-correction
-description: Iterate on an existing PR by evaluating review feedback and CI evidence, reproducing failures narrowly, fixing bounded implementation defects on the same branch, and escalating contract changes instead of silently expanding scope. Never merge from this skill.
+description: Use when an existing pull request has failing actionable CI, substantive review feedback, a contract-review correction, a flaky or infrastructure failure needing classification, or a bounded implementation defect that should stay on the same branch and PR.
 ---
 
 # PR Integration and Correction
 
-## Authority
-
-For Arena product PRs, use the branch, correction, contract-revision, review, acceptance, and merge boundaries in ../../execution/arena-dispatch.md.
-
-This skill owns the technical correction loop inside those boundaries.
-
-It never authorizes merge.
-
 ## Purpose
 
-Bring a PR from a technically failing or review-defective state to a new finished candidate without using remote CI as the primary debugger, blindly accepting review comments, changing the contract in secret, opening replacement PRs for ordinary corrections, or crossing human acceptance and merge gates.
+Turn review and CI evidence into bounded corrections without using remote CI as the primary debugger, blindly accepting feedback, or changing the contract in secret.
 
-## Use when
+Ordinary implementation misses stay on the same branch and PR.
 
-Use this skill when an existing PR has:
+## Authority
 
-- failing actionable CI;
-- contract-review corrections;
-- substantive code-review findings;
-- reviewer feedback requiring technical evaluation;
-- flaky or infrastructure checks that need classification;
-- a bounded implementation defect discovered after review.
+For Arena product PRs, read `../../execution/arena-dispatch.md`. It owns contract revision, correction, acceptance, and merge boundaries.
+
+This skill never authorizes merge.
 
 ## Workflow
 
-### 1. Identify the PR and active contract
+### 1. Identify the live candidate
 
-Establish repository, PR number and branch, current head commit, active Issue contract or revision when applicable, current verification state, and review findings already resolved versus still open.
+Establish:
 
-Do not act on stale feedback from an older head without checking whether it still applies.
+- repository and PR;
+- current head commit;
+- active Issue contract/revision when applicable;
+- current verification state;
+- unresolved review findings.
 
-### 2. Collect actionable evidence
+Check whether older feedback still applies to the current head.
 
-Gather failing check names and logs, review comments and findings, contract-review outcome, current diff, and relevant project commands.
+### 2. Collect evidence
 
-Separate human or merge gates from technical failures.
+Gather:
+
+- failing checks and logs;
+- review comments/findings;
+- contract-review outcome;
+- current diff;
+- relevant project commands.
+
+Separate technical failures from human or merge gates.
 
 ### 3. Classify each item
 
-#### Implementation defect
+| Class | Action |
+|---|---|
+| Implementation defect | correct on the same branch |
+| Test defect | correct only when the accepted behavior proves the test wrong |
+| Review misunderstanding | reject with technical evidence |
+| Infrastructure/transient | rerun or report; do not patch product code |
+| Contract exception | return to the control plane |
 
-Code, test, or configuration fails the valid contract.
-
-Correct on the same branch.
-
-#### Test defect
-
-The test is wrong relative to accepted behavior.
-
-Correct the test only with evidence from the contract and implementation semantics.
-
-#### Review misunderstanding
-
-Feedback does not apply after inspecting code and project reality.
-
-Respond with technical evidence; do not implement it merely to satisfy the comment.
-
-#### Infrastructure or transient failure
-
-A network, provider, or flaky environment failure not caused by the candidate.
-
-Re-run or report according to project policy rather than changing product code.
-
-#### Contract exception
-
-Feedback or failure exposes a need to change requirements, architecture, scope, security boundary, dependency policy, data contract, or another material decision.
-
-Return to the control plane under ../../execution/arena-dispatch.md.
-
-### 4. Evaluate review feedback before implementing
+### 4. Evaluate review feedback before editing
 
 For each substantive comment:
 
-1. read it completely;
-2. restate the technical requirement internally;
-3. verify it against codebase reality;
-4. check accepted requirements and architecture;
-5. determine whether it is correct for this project;
-6. implement only if valid.
+1. understand the technical claim;
+2. verify it against codebase reality;
+3. check accepted requirements/architecture;
+4. determine whether it is correct for this project;
+5. implement only when valid.
 
-External reviewers are useful evidence, not automatic authority.
+Reviewer authority does not override accepted project authority.
 
-If a comment conflicts with an accepted project decision, escalate rather than silently following it.
+### 5. Diagnose CI failures narrowly
 
-### 5. Reproduce CI failures narrowly
+Read the actual failing log.
 
-For each actionable failure:
+Create or run the smallest useful reproducer, establish root cause, correct it, and regain focused green locally where practical.
 
-1. read the actual failing log;
-2. identify the assertion, error, or rule;
-3. create or run the smallest local reproducer where practical;
-4. state the root cause before editing;
-5. correct the root cause;
-6. run the focused check locally.
+Use `../debugging-recovery/SKILL.md` for non-trivial root-cause work and `../test-driven-development/SKILL.md` when regression protection is appropriate.
 
-CI should confirm the correction, not serve as the only edit-run loop.
+CI should confirm the fix rather than serve as the only edit-run loop.
 
 ### 6. Keep corrections bounded
 
-Ordinary corrections remain on the same branch and PR.
+Do not mix unrelated cleanup, broad refactoring, or new requirements into the correction.
 
-Do not create a fresh PR for each fix, mix unrelated cleanup, refactor broadly because review exposed nearby debt, or change the active contract to make tests pass.
+If the fix needs a material change to scope, architecture, security, dependencies, data, interface, or user-visible behavior, raise a contract exception.
 
-If correction reveals broader project work, capture it separately.
+### 7. Verify and re-evaluate the new head
 
-### 7. Verify each correction
+Use `../../execution/verification.md`.
 
-Use ../debugging-recovery/SKILL.md for root-cause failures, ../test-driven-development/SKILL.md when behavior needs regression protection, and ../../execution/verification.md for check selection.
+Push the corrected candidate, inspect new provider results and high-signal feedback, and confirm previous corrections still hold.
 
-Regain targeted green before pushing another candidate.
+If the same failure persists after reasonable root-cause attempts, report the blocker instead of looping blindly.
 
-### 8. Push a new candidate and re-evaluate
+### 8. Stop at technical readiness
 
-After bounded corrections, update the branch, let relevant provider checks run, inspect new high-signal feedback, and ensure previous fixes still hold.
+Stop when actionable technical checks and required corrections are resolved and only human/provider gates remain.
 
-If the same failure recurs after reasonable root-cause attempts, report the blocker instead of blindly looping.
-
-### 9. Stop at technical readiness
-
-When actionable CI is green or appropriately explained, required review corrections are resolved, post-correction verification is fresh, and only human approval or merge gates remain, stop and report the current state.
-
-Do not mark ready, approve, or merge unless that separate action was explicitly authorized and permitted by canonical policy.
+Do not mark accepted or merge from this skill.
 
 ## Output contract
 
-### PR Candidate
+Produce:
 
-PR and head being corrected.
+- PR / current head
+- Resolved Items: evidence → root cause → correction → focused verification
+- Unresolved Items
+- Contract Exceptions
+- Current Verification State
+- Remaining Human / Provider Gates
 
-### Resolved Items
+## Boundaries
 
-Failure or review item → root cause → correction → focused evidence.
+- Do not change code before reading the failing evidence.
+- Do not use push-and-pray CI loops.
+- Do not implement review comments merely because they were requested.
+- Do not treat style preference as a contract requirement.
+- Do not create a new PR for an ordinary implementation miss.
+- Do not hide material contract changes inside a correction.
+- Do not merge because checks are green.
 
-### Unresolved Items
+## Completion gate
 
-Including infrastructure or ambiguous feedback.
-
-### Contract Exceptions
-
-Material changes returned to the control plane.
-
-### Verification State
-
-Fresh targeted and terminal evidence as applicable.
-
-### Remaining Gates
-
-Human review, acceptance, merge, provider gate, or other non-technical state.
-
-## Red flags
-
-- changing code from a CI failure without reading the log;
-- repeated push-and-pray CI cycles;
-- reviewer comment implemented without checking codebase reality;
-- performative agreement replacing technical evaluation;
-- low-priority style suggestion treated as contract requirement;
-- correction branch expanded with unrelated cleanup;
-- material architecture or requirements change hidden in a fix;
-- opening a new PR for an ordinary implementation miss;
-- merging because checks are green.
-
-## Completion check
-
-Before handing the PR back, confirm:
+Before handoff, confirm:
 
 - current head and active contract are known;
-- every actionable failure or comment is classified;
+- every actionable item is classified;
 - code failures were reproduced narrowly where practical;
 - root causes, not symptoms, were corrected;
 - valid feedback was implemented and invalid feedback was technically rejected;
 - corrections stayed within scope;
 - contract exceptions were escalated;
 - fresh verification applies to the current head;
-- merge and acceptance gates remain separate.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- getsentry/skills — skills/iterate-pr/SKILL.md — iterate-pr — Apache-2.0
-- tomzx/agents — skills/handle-pr-ci/SKILL.md — handle-pr-ci — MIT
-- obra/superpowers — skills/receiving-code-review/SKILL.md — receiving-code-review — MIT
-
-This is an Anthracite-specific rewrite. Bundled PR scripts, fixed polling loops, foreign reviewer buckets, mandatory user approval before each technical commit, and automatic merge or readiness behavior are intentionally not inherited.
+- acceptance and merge remain separate gates.
