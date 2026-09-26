@@ -1,223 +1,112 @@
 ---
 name: incremental-implementation
-description: Execute approved work in thin, verifiable increments while keeping the repository working, preserving scope, and escalating material contract discoveries instead of silently redesigning the project during implementation.
+description: Use when implementing an approved multi-step or multi-file change that can be delivered in thin verifiable slices, especially when a large unverified edit would hide risk or when Arena is executing an approved Issue contract.
 ---
 
 # Incremental Implementation
 
-## Authority
-
-For Arena product work, `../../execution/arena-dispatch.md` owns the implementation authority, branch/PR boundary, contract exceptions, and correction lifecycle.
-
-This skill governs how implementation proceeds *inside* that approved boundary.
-
-It never expands implementation authority.
-
 ## Purpose
 
-Build one complete, meaningful increment at a time.
+Build one meaningful slice at a time, verify it, and carry the working state forward.
 
-Each increment should reduce uncertainty, leave the candidate in a coherent state, and produce evidence before the next slice begins.
+Implementation may choose local details inside an approved contract. It may not silently change material scope, architecture, requirements, security boundaries, dependencies, data contracts, or user-visible behavior.
 
-Avoid large unverified code drops.
+## Authority
 
-## Use when
-
-Use this skill for:
-
-- multi-file feature work;
-- implementation from an approved plan or Issue;
-- refactoring required by an approved change;
-- migrations that can be decomposed safely;
-- any task large enough that a single unverified edit would hide too much failure surface.
-
-For a truly mechanical atomic edit, the full slicing ceremony may be unnecessary.
-
-## Preconditions
-
-Before implementation:
-
-- the active execution contract is identifiable;
-- scope and non-goals are known;
-- material architecture constraints are accepted;
-- acceptance criteria are observable;
-- project-owned verification commands can be discovered.
-
-If these are not true, return to planning or the control plane rather than inventing them.
+For Arena product work, read `../../execution/arena-dispatch.md`. It owns implementation authority, contract exceptions, branch/PR boundaries, correction cycles, and completion reporting.
 
 ## Workflow
 
 ### 1. Read the active contract
 
-Identify:
-
-- objective;
-- allowed scope;
-- prohibited scope;
-- constraints;
-- acceptance criteria;
-- required verification;
-- contract exceptions.
+Identify objective, scope, out-of-scope areas, constraints, acceptance criteria, verification, and contract exceptions.
 
 Load only the project context needed for the current slice.
 
-Do not reconstruct intent from old chat when the Issue or repository owns it.
+### 2. Choose the smallest meaningful slice
 
-### 2. Choose the next smallest meaningful slice
+Prefer a complete behavior that:
 
-Prefer a slice that:
-
-- delivers one complete behavior;
-- crosses only the layers required for that behavior;
+- crosses only required layers;
 - can be tested or demonstrated;
 - leaves the repository coherent;
 - exposes important risk early.
 
-Avoid horizontal batches such as "all models", then "all APIs", then "all UI" unless the work is an inherently wide migration.
+Use a wide migration sequence only when a vertical slice cannot remain valid independently.
 
-### 3. Keep implementation simple
+### 3. Implement simply and stay in scope
 
-Implement the simplest correct behavior that satisfies the current contract.
+Choose the simplest correct implementation for the current contract.
 
-Avoid:
+Do not mix:
 
-- abstractions for hypothetical future use;
-- opportunistic modernization;
 - unrelated cleanup;
-- broad renames not required by the slice;
-- new features that merely seem useful.
+- speculative abstractions;
+- opportunistic modernization;
+- features not requested;
+- broad refactors unrelated to the slice.
 
-If adjacent debt is discovered, record it as follow-up rather than silently expanding scope.
+Record useful out-of-scope debt separately.
 
-### 4. Use TDD for behavior changes
+### 4. Use the right feedback loop
 
-When behavior can be tested first, use `../test-driven-development/SKILL.md`.
+For behavior changes, apply `../test-driven-development/SKILL.md` when test-first behavior is practical.
 
-For a bug fix, reproduce the failure before correcting it.
+For bugs, reproduce before fixing.
 
-For configuration or other work where a behavioral test is not the right tool, use the smallest meaningful verification that can prove the change.
+For configuration or other non-testable changes, use the smallest check that can prove the current hypothesis.
 
-### 5. Verify the slice narrowly
+Follow `../../execution/verification.md` rather than running terminal acceptance after every edit.
 
-Use `../../execution/verification.md`.
+### 5. Classify implementation discoveries
 
-Prefer:
+**Local detail:** helper shape, naming, bounded refactor, or other implementation choice inside the contract → proceed.
 
-1. exact focused test or reproducer;
-2. affected module/component;
-3. affected subsystem only when needed.
+**Implementation defect:** code/test is wrong while the contract remains valid → diagnose and correct on the same branch.
 
-Do not run terminal full-repository acceptance after every small edit.
+**Contract exception:** material requirement, architecture, security, dependency, data, interface, scope, or user-visible behavior must change → stop and report under Arena policy.
 
-### 6. Keep the repository coherent
+### 6. Carry forward verified slices
 
-After a completed slice:
+After each slice, keep focused checks green and remove temporary scaffolding unless it has earned a permanent role.
 
-- relevant focused checks are green;
-- temporary scaffolding is removed or intentionally retained;
-- incomplete behavior is safely hidden or structurally non-user-facing if partial landing is allowed;
-- existing behavior outside scope remains intact.
+Do not restart the plan or reopen accepted decisions without evidence.
 
-Feature flags are one option, not a universal requirement.
+### 7. Produce a finished candidate
 
-### 7. Treat implementation discoveries correctly
-
-Classify discoveries.
-
-#### Local implementation detail
-
-Examples:
-
-- helper shape;
-- local function decomposition;
-- internal naming;
-- small refactor needed to satisfy the contract.
-
-Proceed within the approved scope.
-
-#### Implementation defect
-
-The contract is valid but the code or test is wrong.
-
-Diagnose and correct within the same branch/PR.
-
-#### Contract exception
-
-The implementation reveals a material need to change:
-
-- scope;
-- architecture;
-- accepted requirements;
-- user-visible behavior;
-- security/trust boundaries;
-- major dependencies/tooling;
-- data model or external contract.
-
-Stop and report according to `../../execution/arena-dispatch.md`.
-
-Do not hide a contract change inside "implementation detail".
-
-### 8. Continue slice by slice
-
-Each successful slice becomes the foundation for the next.
-
-Do not restart reasoning from scratch when accepted earlier slices still hold.
-
-Keep enough implementation evidence in commits, tests, and the PR to make the final candidate understandable without an implementation diary.
-
-### 9. Produce a finished candidate
-
-When all approved slices are complete:
+When all slices are implemented:
 
 - run affected-scope verification;
 - remove temporary diagnostics;
-- reconcile documentation required by the change;
-- ensure the diff remains inside scope;
-- prepare for terminal verification.
-
-Then use `../verification-before-completion/SKILL.md`.
+- update required documentation;
+- confirm the diff remains in scope;
+- hand the finished candidate to terminal verification.
 
 ## Output contract
 
-Implementation should leave:
+Leave:
 
-- working code/configuration inside approved scope;
-- focused tests or other regression protection where appropriate;
+- implementation inside approved scope;
+- focused regression protection where appropriate;
 - targeted verification evidence;
-- no silent contract expansion;
-- explicit contract exception evidence if implementation cannot proceed safely;
-- a coherent finished candidate ready for terminal verification and review.
+- explicit contract-exception evidence when work cannot safely continue;
+- one coherent finished candidate ready for terminal verification and review.
 
-## Red flags
+## Boundaries
 
-- hundreds of lines written before any meaningful check;
-- implementing the whole feature before exercising one path;
-- unrelated cleanup mixed into the slice;
-- broad refactor justified only as "while we're here";
-- changing requirements to fit the implementation;
-- swallowing a security or architecture discovery as local detail;
-- repeated full-suite/CI runs instead of a focused feedback loop;
-- leaving the branch knowingly broken between ordinary slices;
-- declaring completion before fresh terminal verification.
+- Do not silently rewrite the contract to fit implementation.
+- Do not mix unrelated cleanup into the change.
+- Do not use full CI as the ordinary inner feedback loop.
+- Do not leave ordinary slices knowingly broken.
+- Do not claim completion before fresh terminal verification.
 
-## Completion check
+## Completion gate
 
 Before handoff, confirm:
 
 - every approved behavior has an implemented slice;
-- slices remained within the active contract;
-- focused verification was used during the loop;
+- implementation remained inside the active contract;
+- focused verification supported the inner loop;
 - implementation defects were corrected without changing the contract;
 - material contract discoveries were escalated;
-- unrelated cleanup was excluded;
-- the finished candidate is coherent and ready for terminal verification.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- addyosmani/agent-skills — `skills/incremental-implementation/SKILL.md` — `incremental-implementation` — MIT
-- obra/superpowers — `skills/executing-plans/SKILL.md` — `executing-plans` — MIT
-- bmad-code-org/BMAD-METHOD — `skills/bmad-build/SKILL.md` — `bmad-build` — MIT
-
-This is an Anthracite-specific rewrite. Superpowers worktree/ledger/subagent orchestration, BMAD runtime scripts, mandatory commit cadence, and foreign execution workspaces are intentionally not inherited.
+- the candidate is coherent and ready for completion verification.
