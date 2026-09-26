@@ -1,316 +1,155 @@
 ---
 name: observability-operations-design
-description: Design and implement telemetry that makes production behavior diagnosable. Start from operator questions and user-visible reliability, choose logs/metrics/traces intentionally, define actionable alerts and SLOs where warranted, and avoid telemetry noise or sensitive-data leakage.
+description: Use when production behavior needs logs, metrics, traces, health signals, actionable alerts, SLIs/SLOs, or better diagnostic evidence, especially for services, jobs, queues, retries, external dependencies, or features that would otherwise ship blind.
 ---
 
 # Observability and Operations Design
 
 ## Purpose
 
-Production behavior should be explainable from outside the process.
+Make production behavior answerable from outside the process.
 
-Observability is part of a production feature when operators need evidence that it is working, degrading, or failing.
+Start from operator questions and user-visible reliability, then add only the telemetry needed to answer them.
 
-Instrumentation should answer real questions. Telemetry without a question is noise.
+## Decision rules
 
-## Use when
+| Signal | Best for |
+|---|---|
+| Structured log | what happened in one specific operation and why |
+| Metric | how often, how fast, how saturated, or how much |
+| Trace | where time or failure propagated across boundaries |
+| Health check | whether a component is usable for a defined platform purpose |
 
-Use this skill when:
-
-- a feature or service will run in production;
-- adding external calls, queues, jobs, retries, or cross-service behavior;
-- defining logs, metrics, traces, health checks, or alerts;
-- reliability targets need SLIs/SLOs;
-- a previous incident was hard to diagnose because evidence was missing;
-- release criteria depend on production signals.
-
-Do not add observability ceremony to static artifacts or purely local tooling with no operational need.
+Use the cheapest signal that answers the question clearly.
 
 ## Workflow
 
-### 1. Start with operator questions
+### 1. State operator questions
 
-Before choosing telemetry, state the questions a responder should be able to answer.
-
-Examples:
+Write the questions a responder must answer, such as:
 
 - Is the capability working for users?
 - How often does it fail?
-- What type of failure dominates?
+- Why did one operation fail?
 - Is a dependency slow or unavailable?
 - Is a queue backing up?
-- Which request/job/tenant experienced the issue?
-- Did a recent deployment change the behavior?
+- Did a deployment change behavior?
 
-Every signal should help answer a question.
+Every signal should support at least one real question.
 
 ### 2. Identify critical paths and failure modes
 
-Use requirements and architecture to identify:
+Use requirements and architecture to locate:
 
-- important user flows;
+- user-critical flows;
 - state transitions;
 - external dependencies;
 - async boundaries;
 - retries;
-- queues;
-- scheduled jobs;
+- queues/jobs;
 - invariants whose violation matters.
 
 Instrument the path, not every line.
 
-### 3. Choose the correct signal
+### 3. Design logs, metrics, and traces deliberately
 
-Use the signal whose shape matches the question.
+Prefer structured log events with stable fields.
 
-#### Logs
+Use bounded-cardinality metric dimensions; never use request IDs, raw URLs, emails, error messages, or other unbounded values as labels.
 
-Best for:
+Propagate correlation/trace context across network and async boundaries where reconstruction matters.
 
-- specific event context;
-- why one operation failed;
-- state transition detail;
-- diagnostic fields.
+### 4. Protect telemetry
 
-Prefer structured events with stable field names.
+Treat telemetry as a data system.
 
-#### Metrics
+Keep secrets, credentials, full payment data, and unnecessary personal data out of logs/traces.
 
-Best for:
+Use field allowlists and project-appropriate retention/access controls.
 
-- rate;
-- errors;
-- duration;
-- saturation;
-- queue depth;
-- aggregate business/operational counts.
+### 5. Define reliability signals where needed
 
-Avoid unbounded label cardinality.
+For request-driven systems, rate/errors/duration may be useful.
 
-#### Traces
+For resources, utilization/saturation/errors may be useful.
 
-Best for:
+For async work, consider queue depth, oldest-item age, throughput, retry/dead-letter rate, and completion latency.
 
-- latency across boundaries;
-- causal path through distributed work;
-- dependency timing;
-- one request/job across services.
+Choose only signals tied to real operational questions.
 
-Propagate trace/correlation context across async and network boundaries where useful.
-
-### 4. Correlate operations
-
-Use stable correlation identifiers for a single request, job, workflow, or other execution unit when cross-component reconstruction matters.
-
-Do not use high-cardinality correlation IDs as metric labels.
-
-For systems with several entry points, record enough structured context to distinguish how the operation started.
-
-### 5. Protect telemetry
-
-Telemetry is another data system.
-
-Do not log:
-
-- passwords;
-- secrets;
-- tokens;
-- full payment data;
-- unnecessary personal data;
-- raw sensitive request/response bodies.
-
-Prefer field allowlists.
-
-Apply retention/access controls appropriate to telemetry sensitivity.
-
-### 6. Define health signals
-
-For request-driven behavior, consider rate/errors/duration.
-
-For resources, consider utilization/saturation/errors.
-
-For asynchronous work, consider:
-
-- age of oldest item;
-- queue depth;
-- throughput;
-- retry/dead-letter rates;
-- completion latency.
-
-Choose project-appropriate signals rather than blindly applying every framework.
-
-### 7. Define SLIs before SLOs
+### 6. Define SLIs before SLOs
 
 When reliability objectives matter, define an SLI that reflects user-perceived success.
 
-Examples:
+Set SLOs from user/business requirements, current capability, dependency limits, and reliability cost.
 
-- successful eligible requests / eligible requests;
-- operations completed within latency target / total operations;
-- durable successful writes / write attempts.
+Do not default every system to a conventional number of nines.
 
-Avoid infrastructure proxies when they do not represent user outcome.
+Use error budgets only when they change release or reliability decisions.
 
-### 8. Set SLOs deliberately
-
-An SLO should reflect:
-
-- user expectations;
-- business/contract requirements;
-- current capability;
-- cost of higher reliability;
-- dependency limitations.
-
-Do not default every service to "four nines".
-
-SLA is an external agreement; SLO is an internal target; SLI is the measurement.
-
-Do not conflate them.
-
-### 9. Use error budgets where they change decisions
-
-For services where SLOs govern reliability investment, error budgets can balance delivery and reliability work.
-
-Do not add an error-budget process to a project that has no need for it.
-
-If used, define what budget consumption changes:
-
-- rollout risk;
-- release pace;
-- reliability priority;
-- incident follow-up.
-
-### 10. Define actionable alerts
-
-An alert should lead to a useful response.
+### 7. Define actionable alerts and runbooks
 
 For each alert, specify:
 
-- condition;
-- duration/window;
+- condition/window;
 - severity;
 - user/system impact;
 - first diagnostic action;
-- runbook or response path;
-- owner/escalation where applicable.
+- response/runbook;
+- owner or escalation when relevant.
 
-If nobody should act, prefer a dashboard or log over a page.
+If nobody should act, prefer a dashboard or log.
 
-Alert on symptoms meaningful to users/services rather than every low-level fluctuation.
+### 8. Verify telemetry
 
-### 11. Add health/readiness checks where they have semantics
-
-Health checks should answer a useful question.
-
-Do not create an endpoint that returns 200 while the capability it claims to represent cannot function.
-
-Separate liveness/readiness/dependency health only where the platform and failure model need it.
-
-### 12. Verify telemetry
-
-Instrumentation is not complete because code compiles.
-
-Where practical, verify:
+Where practical, prove:
 
 - expected log event appears;
 - metric changes under controlled behavior;
-- trace propagates across intended boundaries;
-- alert expression can fire under test/simulation;
+- trace crosses intended boundaries;
+- health check reflects meaningful readiness;
+- alert expression can fire;
 - sensitive fields are absent;
-- dashboards/queries can answer the original operator questions.
+- original operator questions are answerable.
 
-Use `../../execution/verification.md`.
+Use the canonical verification strategy.
 
 ## Output contract
 
-### Operator Questions
+Define:
 
-What must be diagnosable.
+- Operator Questions
+- Critical Paths / Failure Modes
+- Logs
+- Metrics / SLIs
+- Traces
+- Health Checks where meaningful
+- SLO / Error Budget where justified
+- Alerts / Runbooks
+- Telemetry Data Constraints
+- Verification
 
-### Critical Paths / Failure Modes
+Implement these in the project's actual code, provider configuration, dashboards, alert rules, and runbooks rather than a shadow observability artifact.
 
-What behavior needs visibility.
+## Boundaries
 
-### Logs
+- Do not log everything.
+- Do not alert on signals with no action.
+- Do not put high-cardinality identifiers into metrics.
+- Do not leak secrets or unnecessary PII into telemetry.
+- Do not create SLO/error-budget ceremony without a reliability decision attached.
+- Do not impose a specific observability vendor or stack on a project-neutral system.
+- Do not confuse observability design with active incident response.
 
-Events and fields required.
-
-### Metrics
-
-SLIs and operational metrics.
-
-### Traces
-
-Boundaries requiring causal/latency visibility.
-
-### Health Checks
-
-Only where meaningful.
-
-### SLO / Error Budget
-
-Only where reliability policy requires them.
-
-### Alerts / Runbooks
-
-Actionable conditions and response.
-
-### Data Handling
-
-Telemetry privacy/security constraints.
-
-### Verification
-
-How the signals will be proven to exist and behave.
-
-## Artifact ownership
-
-Do not create a mandatory observability document or Prometheus file.
-
-Put telemetry in the actual project:
-
-- instrumentation code;
-- telemetry configuration;
-- dashboards;
-- alert rules;
-- runbooks;
-- provider configuration;
-- project documentation.
-
-Use whatever system the project actually owns.
-
-## Red flags
-
-- "log everything";
-- alerts with no action;
-- user IDs/request IDs as metric labels;
-- averages hiding tail latency;
-- sensitive payloads in logs;
-- instrumentation added only after production failure;
-- dashboard metrics with no decision attached;
-- SLO target chosen because it sounds professional;
-- health endpoint that does not reflect meaningful readiness;
-- vendor-specific observability architecture imposed on a provider-neutral project.
-
-## Completion check
+## Completion gate
 
 Before handoff, confirm:
 
-- every telemetry signal answers a stated operator question;
+- every signal answers a stated operator question;
 - critical failure paths are diagnosable;
 - signal type matches the question;
 - correlation works where needed;
-- sensitive data is excluded/minimized;
+- sensitive data is excluded or minimized;
 - SLOs reflect user-visible reliability when used;
 - alerts are actionable;
-- telemetry itself has verification evidence.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- addyosmani/agent-skills — `skills/observability-and-instrumentation/SKILL.md` — `observability-and-instrumentation` — MIT
-- tomzx/agents — `skills/create-observability/SKILL.md` — `create-observability` — MIT
-- wshobson/agents — `plugins/observability-monitoring/skills/slo-implementation/SKILL.md` — `slo-implementation` — MIT
-
-This is an Anthracite-specific rewrite. Prometheus/OpenTelemetry implementation examples, mandatory observability artifacts, fixed alert formats, and universal SLO/error-budget requirements are intentionally not inherited.
+- telemetry has fresh verification evidence.
