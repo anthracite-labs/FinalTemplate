@@ -1,184 +1,99 @@
 ---
 name: verification-before-completion
-description: Enforce fresh evidence before any completion claim. Trace acceptance criteria to observable proof, follow FinalTemplate's canonical narrow-to-broad verification strategy, and keep technical verification distinct from contract compliance, human acceptance, and merge state.
+description: Use when work is about to be called complete, fixed, passing, ready for review, or technically verified, or when a PR's acceptance criteria need fresh evidence tied to the exact candidate being reviewed.
 ---
 
 # Verification Before Completion
 
-## Canonical owner
+## Purpose
 
-Universal verification strategy is owned by ../../execution/verification.md.
+Require fresh evidence before any completion claim.
 
-Read and follow that file.
+Verification proves technical behavior for a concrete candidate. It does not imply contract compliance, human acceptance, or merge.
 
-This skill is the completion gate layered on top of that strategy. It does not redefine command selection, feedback-loop depth, or terminal acceptance.
+## Authority
 
-If this skill and the canonical verification file conflict, the canonical verification file wins.
+Read and follow `../../execution/verification.md`. It owns the universal narrow-to-broad verification strategy and terminal acceptance behavior.
 
-## Core rule
+For Arena work, `../../execution/arena-dispatch.md` owns the distinction:
 
-No completion claim without fresh evidence.
-
-A belief that work should pass is not evidence.
-
-A previous run against an older candidate is not evidence for the current candidate.
-
-A green unit test is not evidence that every acceptance criterion is satisfied.
-
-## Use when
-
-Use this skill before saying that work is complete, fixed, passing, ready for review, technically verified, or safe to hand off as a finished candidate.
-
-Also use it when reviewing whether a PR has evidence for its acceptance criteria.
-
-## State separation
-
-Keep these states distinct:
-
-VERIFIED is not CONTRACT-COMPLIANT, which is not ACCEPTED, which is not MERGED.
-
-- VERIFIED means required technical evidence for the candidate is fresh and sufficient.
-- CONTRACT-COMPLIANT means normal ChatGPT has reviewed the candidate against the active contract.
-- ACCEPTED means the human has given final acceptance.
-- MERGED means GitHub history contains the accepted integration.
-
-This skill establishes only verification.
+`VERIFIED ≠ CONTRACT-COMPLIANT ≠ ACCEPTED ≠ MERGED`.
 
 ## Workflow
 
 ### 1. Identify the candidate
 
-Verification applies to a concrete candidate state.
+Record the branch/commit/diff or other exact state being verified, plus the active contract and environment where runtime behavior matters.
 
-Identify branch, commit, diff or working candidate, active Issue or requirement contract, relevant generated state, and environment if runtime behavior is part of the proof.
+Any required source or generated-state change after terminal acceptance invalidates that acceptance evidence.
 
-Any source or required generated-state change after terminal acceptance invalidates that acceptance evidence.
+### 2. Map requirements to proof
 
-### 2. Identify what must be proven
+For each material acceptance criterion, identify:
 
-Read the acceptance criteria and required verification.
+- implementation surface;
+- static traceability;
+- runtime/observable proof when static inspection is insufficient.
 
-Create a mental or explicit evidence map:
+A green suite alone does not prove every requirement.
 
-criterion → implementation surface → proof
+### 3. Finish narrow verification first
 
-Each material criterion needs evidence appropriate to its behavior.
+If a focused failure exists, leave terminal acceptance and return to the smallest useful reproducer.
 
-### 3. Distinguish traceability from runtime proof
+Regain targeted green before producing another finished candidate.
 
-#### Static traceability
+### 4. Run terminal repository acceptance
 
-Can the reviewer point to implementation or configuration intended to satisfy the criterion?
+Only on the finished candidate, run the complete project-defined acceptance required by `../../execution/verification.md`.
 
-#### Runtime or behavioral proof
+Read exit status, failures, material skips/unavailable checks, and whether verification mutated candidate state.
 
-Can the required behavior actually be exercised, tested, inspected, or measured?
+### 5. Re-check the acceptance boundary
 
-Not every criterion requires a literal runtime demo, but every material criterion needs observable proof.
+Walk every material criterion against fresh evidence for the current candidate.
 
-### 4. Run the smallest meaningful checks during the loop
+Add deeper integration, browser, migration, security, performance, generated-state, or compatibility proof only when risk or the contract requires it.
 
-Follow ../../execution/verification.md.
+### 6. Report the actual result
 
-Do not rerun full repository acceptance merely because one focused test failed.
+Use:
 
-If a narrow failure exists:
+- **VERIFIED** — required technical and acceptance evidence is fresh and sufficient;
+- **NOT VERIFIED** — a required check failed, is unavailable/stale, or does not prove the acceptance boundary.
 
-1. leave terminal acceptance;
-2. reproduce narrowly;
-3. diagnose and correct;
-4. regain focused green;
-5. produce a new finished candidate.
+State what was run, candidate identity, result, unresolved checks, and limitations.
 
-### 5. Run terminal repository acceptance on the finished candidate
+## Output contract
 
-Only when implementation is finished, run the complete project-defined terminal acceptance required for that candidate.
+Produce:
 
-Use actual project commands.
+- Candidate identity
+- Acceptance criterion → evidence map
+- Focused verification used during correction
+- Terminal acceptance result
+- Additional risk-driven proof when required
+- VERIFIED or NOT VERIFIED
+- Explicit limitations/unavailable checks
 
-Do not invent generic commands.
+## Boundaries
 
-Read the entire relevant result: exit status, failures, skipped or unavailable checks when material, and any mutation of candidate state.
+- Do not claim success from old evidence.
+- Do not infer a full result from a partial suite.
+- Do not equate lint with build or tests with full requirements compliance.
+- Do not use terminal acceptance as the inner debugging loop.
+- Do not use VERIFIED as a synonym for CONTRACT-COMPLIANT, ACCEPTED, or MERGED.
+- Do not hide unavailable verification.
 
-A verification process that changes the candidate may require acceptance to run again against the resulting state.
-
-### 6. Verify acceptance criteria explicitly
-
-After technical commands are green, revisit each material acceptance criterion.
-
-Ask which evidence proves it, whether that evidence applies to the current candidate, whether the proof exercises the actual contract rather than an implementation proxy, and whether any criterion remains unverified.
-
-Tests passing does not automatically mean the requirements are satisfied.
-
-### 7. Scale extra depth to risk
-
-For high-risk, poorly specified, cross-cutting, security-sensitive, migration, or user-critical changes, deepen verification where the ordinary project suite does not prove enough.
-
-Possible additions include a focused integration scenario, contract test, browser or user-flow proof, migration dry run, security-specific check, performance benchmark, generated-state comparison, or compatibility check.
-
-Do not add heavyweight quality theater to every tiny change.
-
-### 8. Report evidence, not optimism
-
-A verification report should state what was run, which candidate it applied to, the result, acceptance criteria proved, checks unavailable or unresolved, and limitations.
-
-If a check could not run, say so.
-
-Do not infer PASS from absence of evidence.
-
-## Verification outcome
-
-Use one of:
-
-### VERIFIED
-
-All required technical verification and acceptance evidence for the current candidate is fresh and sufficient.
-
-### NOT VERIFIED
-
-One or more required checks failed, are unavailable, are stale, or do not prove the acceptance boundary.
-
-Do not use VERIFIED to imply contract compliance or human acceptance.
-
-## Artifact ownership
-
-Verification evidence normally belongs in the PR completion report, CI or provider result, test output, or project-owned evidence artifact when required.
-
-Do not create a permanent parallel verification database.
-
-## Red flags
-
-- should pass;
-- looks good before running checks;
-- relying on an old run after source changed;
-- trusting an implementation agent's success statement;
-- partial suite presented as full acceptance;
-- lint presented as build proof;
-- tests presented as proof of every requirement without criteria review;
-- coverage percentage presented as behavioral verification;
-- full CI repeatedly used as the local debugging loop;
-- hidden unavailable checks;
-- VERIFIED used as a synonym for ACCEPTED.
-
-## Completion check
+## Completion gate
 
 Before stating VERIFIED, confirm:
 
 - candidate identity is clear;
-- required focused evidence is current;
+- focused evidence is current;
 - terminal repository acceptance ran on the finished candidate;
 - every material acceptance criterion maps to evidence;
-- runtime or observable proof exists where static traceability is insufficient;
-- unavailable verification is disclosed;
-- source or generated state did not change after terminal acceptance;
+- runtime proof exists where static traceability is insufficient;
+- unavailable checks are disclosed;
+- candidate state did not change after terminal acceptance;
 - no claim exceeds the evidence.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- obra/superpowers — skills/verification-before-completion/SKILL.md — verification-before-completion — MIT
-- tomzx/agents — skills/verify-pr/SKILL.md — verify-pr — MIT
-- github/awesome-copilot — quality-playbook skill and supporting references — quality-playbook — MIT
-
-This is an Anthracite-specific rewrite. Recording and demo tooling, worktree requirements, multi-agent quality orchestration, and heavyweight universal audit passes are intentionally not inherited.
