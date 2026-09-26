@@ -1,13 +1,15 @@
 # Execution Routing
 
-Execution routing answers where and how an approved operation should run. It is separate from capability classification.
+Route answers **where or through what execution mechanism a required operation should run**.
+
+It is separate from capability classification and from the skill that defines the method for the work.
 
 ## Default sequence
 
 For each required operation:
 
 1. Identify the exact operation required.
-2. Probe the capabilities available in the current session/environment.
+2. Probe the execution mechanisms and tools available in the current session/environment.
 3. Prefer existing local or directly connected tooling when it can safely perform the operation.
 4. Attempt the smallest relevant command or action.
 5. If blocked, preserve concrete failure evidence.
@@ -22,7 +24,7 @@ Do not move an entire development loop to hosted infrastructure merely because o
 A blocker report should identify:
 
 - the required operation;
-- the current-session capability probe;
+- the current-session execution/tooling probe;
 - the command or action attempted;
 - the route attempted;
 - the relevant failure output;
@@ -33,9 +35,9 @@ A blocker report should identify:
 
 ## Arena
 
-Product implementation is normally executed by Arena through the self-contained GitHub Issue contract defined in `../execution/arena-dispatch.md`.
+Project implementation is normally executed by Arena through the self-contained GitHub Issue contract defined in `../execution/arena-dispatch.md`.
 
-Arena receives bounded implementation authority. It is not responsible for reconstructing product intent from prior chats.
+Arena receives bounded implementation authority. It is not responsible for reconstructing project intent from prior chats.
 
 ## Hosted and provider execution
 
