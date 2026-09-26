@@ -36,7 +36,7 @@ Prefer the project's equivalent of:
 5. security/policy checks where justified;
 6. environment/deployment checks.
 
-Use terminal repository acceptance only for a finished candidate.
+Use terminal repository verification only for a finished candidate.
 
 ### 4. Keep execution reproducible
 
