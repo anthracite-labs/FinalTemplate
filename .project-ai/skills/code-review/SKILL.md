@@ -16,7 +16,7 @@ A clean implementation can miss the contract. A contract-compliant implementatio
 
 ## Authority
 
-For Arena product PRs, read `../../execution/arena-dispatch.md`. It owns contract-review outcomes and the human acceptance/merge boundary.
+For Arena implementation PRs, read `../../execution/arena-dispatch.md`. It owns contract-review outcomes and the human acceptance/merge boundary.
 
 ## Workflow
 
