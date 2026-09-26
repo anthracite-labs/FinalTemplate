@@ -13,7 +13,7 @@ Ordinary implementation misses stay on the same branch and PR.
 
 ## Authority
 
-For Arena product PRs, read `../../execution/arena-dispatch.md`. It owns contract revision, correction, acceptance, and merge boundaries.
+For Arena implementation PRs, read `../../execution/arena-dispatch.md`. It owns contract revision, correction, acceptance, and merge boundaries.
 
 This skill never authorizes merge.
 
@@ -50,7 +50,7 @@ Separate technical failures from human or merge gates.
 | Implementation defect | correct on the same branch |
 | Test defect | correct only when the accepted behavior proves the test wrong |
 | Review misunderstanding | reject with technical evidence |
-| Infrastructure/transient | rerun or report; do not patch product code |
+| Infrastructure/transient | rerun or report; do not patch project code |
 | Contract exception | return to the control plane |
 
 ### 4. Evaluate review feedback before editing
