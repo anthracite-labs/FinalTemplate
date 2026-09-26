@@ -13,7 +13,7 @@ Implementation may choose local details inside an approved contract. It may not 
 
 ## Authority
 
-For Arena product work, read `../../execution/arena-dispatch.md`. It owns implementation authority, contract exceptions, branch/PR boundaries, correction cycles, and completion reporting.
+For Arena implementation work, read `../../execution/arena-dispatch.md`. It owns implementation authority, contract exceptions, branch/PR boundaries, correction cycles, and completion reporting.
 
 ## Workflow
 
@@ -56,7 +56,7 @@ For bugs, reproduce before fixing.
 
 For configuration or other non-testable changes, use the smallest check that can prove the current hypothesis.
 
-Follow `../../execution/verification.md` rather than running terminal acceptance after every edit.
+Follow `../../execution/verification.md` rather than running terminal repository verification after every edit.
 
 ### 5. Classify implementation discoveries
 
@@ -80,7 +80,7 @@ When all slices are implemented:
 - remove temporary diagnostics;
 - update required documentation;
 - confirm the diff remains in scope;
-- hand the finished candidate to terminal verification.
+- hand the finished candidate to terminal repository verification.
 
 ## Output contract
 
@@ -90,7 +90,7 @@ Leave:
 - focused regression protection where appropriate;
 - targeted verification evidence;
 - explicit contract-exception evidence when work cannot safely continue;
-- one coherent finished candidate ready for terminal verification and review.
+- one coherent finished candidate ready for terminal repository verification and review.
 
 ## Boundaries
 
