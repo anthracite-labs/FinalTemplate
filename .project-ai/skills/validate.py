@@ -126,7 +126,7 @@ def main() -> int:
     skill_dirs = sorted(
         path
         for path in ROOT.iterdir()
-        if path.is_dir() and not path.name.startswith(".")
+        if path.is_dir() and (path / "SKILL.md").is_file()
     )
 
     errors: list[str] = []
