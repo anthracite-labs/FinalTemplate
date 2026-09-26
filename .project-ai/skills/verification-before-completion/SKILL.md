@@ -13,7 +13,7 @@ Verification proves technical behavior for a concrete candidate. It does not imp
 
 ## Authority
 
-Read and follow `../../execution/verification.md`. It owns the universal narrow-to-broad verification strategy and terminal acceptance behavior.
+Read and follow `../../execution/verification.md`. It owns the universal narrow-to-broad verification strategy and terminal repository verification behavior.
 
 For Arena work, `../../execution/arena-dispatch.md` owns the distinction:
 
@@ -25,7 +25,7 @@ For Arena work, `../../execution/arena-dispatch.md` owns the distinction:
 
 Record the branch/commit/diff or other exact state being verified, plus the active contract and environment where runtime behavior matters.
 
-Any required source or generated-state change after terminal acceptance invalidates that acceptance evidence.
+Any required source or generated-state change after terminal repository verification invalidates that terminal verification evidence.
 
 ### 2. Map requirements to proof
 
@@ -39,13 +39,13 @@ A green suite alone does not prove every requirement.
 
 ### 3. Finish narrow verification first
 
-If a focused failure exists, leave terminal acceptance and return to the smallest useful reproducer.
+If a focused failure exists, leave terminal repository verification and return to the smallest useful reproducer.
 
 Regain targeted green before producing another finished candidate.
 
-### 4. Run terminal repository acceptance
+### 4. Run terminal repository verification
 
-Only on the finished candidate, run the complete project-defined acceptance required by `../../execution/verification.md`.
+Only on the finished candidate, run the complete project-defined repository verification required by `../../execution/verification.md`.
 
 Read exit status, failures, material skips/unavailable checks, and whether verification mutated candidate state.
 
@@ -59,7 +59,7 @@ Add deeper integration, browser, migration, security, performance, generated-sta
 
 Use:
 
-- **VERIFIED** — required technical and acceptance evidence is fresh and sufficient;
+- **VERIFIED** — required technical evidence and acceptance-criteria evidence is fresh and sufficient;
 - **NOT VERIFIED** — a required check failed, is unavailable/stale, or does not prove the acceptance boundary.
 
 State what was run, candidate identity, result, unresolved checks, and limitations.
@@ -71,7 +71,7 @@ Produce:
 - Candidate identity
 - Acceptance criterion → evidence map
 - Focused verification used during correction
-- Terminal acceptance result
+- Terminal repository verification result
 - Additional risk-driven proof when required
 - VERIFIED or NOT VERIFIED
 - Explicit limitations/unavailable checks
@@ -81,7 +81,7 @@ Produce:
 - Do not claim success from old evidence.
 - Do not infer a full result from a partial suite.
 - Do not equate lint with build or tests with full requirements compliance.
-- Do not use terminal acceptance as the inner debugging loop.
+- Do not use terminal repository verification as the inner debugging loop.
 - Do not use VERIFIED as a synonym for CONTRACT-COMPLIANT, ACCEPTED, or MERGED.
 - Do not hide unavailable verification.
 
@@ -91,9 +91,9 @@ Before stating VERIFIED, confirm:
 
 - candidate identity is clear;
 - focused evidence is current;
-- terminal repository acceptance ran on the finished candidate;
+- terminal repository verification ran on the finished candidate;
 - every material acceptance criterion maps to evidence;
 - runtime proof exists where static traceability is insufficient;
 - unavailable checks are disclosed;
-- candidate state did not change after terminal acceptance;
+- candidate state did not change after terminal repository verification;
 - no claim exceeds the evidence.
