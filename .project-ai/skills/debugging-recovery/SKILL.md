@@ -1,102 +1,52 @@
 ---
 name: debugging-recovery
-description: Diagnose failures by first creating a tight reproducible signal, then testing falsifiable hypotheses until the root cause is established. Correct the root cause, add regression protection, verify recovery, and remove temporary diagnostic scaffolding.
+description: Use when a bug, failing test, build failure, regression, unexpected behavior, integration failure, or performance anomaly needs a reproducible signal and evidence-based root-cause diagnosis before a fix is attempted.
 ---
 
 # Debugging and Recovery
 
 ## Purpose
 
-Debugging is evidence-driven diagnosis, not a sequence of guesses.
+Create a tight failure signal, test falsifiable hypotheses, correct the root cause, and prove recovery.
 
-The first goal is not to edit code. It is to create a reliable feedback loop that distinguishes "failure present" from "failure absent".
-
-Then use that loop to locate root cause and prove recovery.
-
-## Use when
-
-Use this skill for:
-
-- reproducible bugs;
-- failing tests;
-- local or CI failures;
-- regressions;
-- unexpected behavior;
-- integration failures;
-- performance anomalies where the first need is diagnosis rather than optimization;
-- blocked implementation where the cause is technical failure.
-
-For an active production outage or material live degradation, use incident response first to stabilize the system. Debugging may operate inside the incident once immediate harm is controlled.
+The first job is diagnosis, not editing.
 
 ## Workflow
 
-### 1. Describe the symptom precisely
+### 1. State the symptom
 
-Record:
+Separate observation from theory:
 
 - expected behavior;
 - observed behavior;
 - environment/context;
 - frequency;
 - earliest known occurrence;
-- known recent changes if relevant.
-
-Separate observation from theory.
-
-"API returns 500 for request X" is a symptom.
-
-"The ORM is broken" is a hypothesis.
+- relevant recent changes when known.
 
 ### 2. Build the tightest reliable reproducer
 
-Choose the cheapest loop that can reliably show the failure:
+Use the cheapest loop that can reliably show the failure:
 
-- focused automated test;
-- command-line invocation;
-- curl/API request;
-- small script/harness;
+- focused test;
+- CLI/API invocation;
+- small harness;
 - browser reproduction;
 - trace query;
-- minimal data fixture;
+- minimal fixture;
 - benchmark;
 - differential comparison;
 - bisect.
 
-A useful reproducer is:
+Confirm the reproducer fails for the reported symptom rather than for its own setup error.
 
-- repeatable;
-- fast enough for iteration;
-- narrow enough to isolate evidence;
-- close enough to the real failure to remain valid.
+### 3. Minimize the failing surface
 
-If reproduction is intermittent, first improve observability or collect enough runs to characterize it.
+Reduce variables without removing the real trigger.
 
-### 3. Confirm the reproducer
+Compare known-good and failing inputs, versions, configurations, dependencies, or environments where useful.
 
-Run it before fixing anything.
-
-Verify:
-
-- it actually fails;
-- the failure matches the reported symptom;
-- failure is not caused by the harness itself.
-
-No reliable failure signal means the fix loop is not ready.
-
-### 4. Minimize the failing surface
-
-Reduce variables where possible:
-
-- smallest input;
-- smallest environment;
-- smallest affected module;
-- one dependency at a time;
-- known-good vs failing version;
-- one configuration difference.
-
-Do not minimize so aggressively that you remove the real trigger.
-
-### 5. Form falsifiable hypotheses
+### 4. Form falsifiable hypotheses
 
 For each plausible cause, state:
 
@@ -105,171 +55,88 @@ For each plausible cause, state:
 - evidence that would reject it;
 - cheapest next observation.
 
-Prefer experiments that eliminate whole classes of causes.
+Change one independent variable at a time.
 
-Do not change multiple independent things at once.
+### 5. Instrument only where evidence is missing
 
-### 6. Instrument only where evidence is missing
+Add targeted temporary logs, assertions, spans, counters, timing, or state snapshots.
 
-Add temporary diagnostics when existing telemetry cannot answer the hypothesis.
+Do not flood logs or expose secrets/sensitive data.
 
-Examples:
-
-- structured logging;
-- assertions;
-- trace spans;
-- counters;
-- state snapshots;
-- timing measurements.
-
-Avoid indiscriminate log flooding.
-
-Do not expose secrets or sensitive data while debugging.
-
-### 7. Trace to root cause
-
-Keep asking why the failure occurs until the explanation identifies the source condition that should change.
+### 6. Trace to root cause
 
 Distinguish:
 
-- **symptom location** — where the failure is visible;
-- **propagation path** — how bad state travels;
-- **root cause** — the earliest correctable condition that produces the failure.
+- symptom location;
+- propagation path;
+- earliest correctable source condition.
 
-Do not patch a downstream symptom when an upstream invariant is broken.
+Do not patch a downstream symptom while an upstream invariant remains broken.
 
-### 8. Correct minimally
+### 7. Correct minimally
 
-Change the smallest source behavior that removes the root cause while preserving unrelated behavior.
+Make the smallest source change that removes the root cause while preserving unrelated behavior.
 
-If the required fix would materially alter the active implementation contract, treat it as a contract exception rather than silently expanding scope.
+If the real fix requires a material contract change, escalate rather than hiding it inside debugging.
 
-### 9. Add regression protection
+### 8. Add regression protection
 
-Where practical, keep a test or other deterministic check that would fail if the root cause returned.
+Where practical, turn the reproducer into a durable test or deterministic check.
 
-For a bug fix, prefer the reproducer itself becoming the regression test.
+For a bug fix, the regression test should fail on the broken behavior and pass on the fix.
 
-### 10. Verify recovery
+### 9. Verify recovery
 
-Use the canonical verification strategy:
+Follow `../../execution/verification.md`.
 
-`../../execution/verification.md`
-
-At minimum:
+At minimum, verify:
 
 - original reproducer is green;
 - affected-scope checks are green;
-- original user/system scenario works where practical;
-- no known new failure was introduced.
+- original user/system scenario works where practical.
 
-### 11. Remove temporary diagnostics
+For stateful failures, also verify the recovered state independently.
 
-Remove temporary:
+### 10. Clean up and route durable learning
 
-- debug logs;
-- probes;
-- breakpoints;
-- test-only hacks;
-- local feature switches;
+Remove temporary diagnostics unless they have earned a permanent observability role.
 
-unless they have earned a permanent observability role.
-
-### 12. Capture durable learning only when useful
-
-If root cause reveals:
-
-- missing invariant;
-- architecture flaw;
-- observability gap;
-- recurring test gap;
-- runbook gap;
-
-route that improvement to the owning lifecycle artifact.
+Route lasting gaps to their owner: test, architecture, observability, runbook, documentation, or follow-up work.
 
 Do not create a permanent debugging diary.
 
-## Recovery after destructive or stateful failures
-
-Some failures require restoring state, not only fixing source.
-
-Before recovery:
-
-- understand what state may be partial or corrupt;
-- preserve evidence where security/data integrity matters;
-- identify the last known-good state;
-- distinguish rollback from forward repair;
-- verify the recovered state independently.
-
-Do not assume application-code rollback reverses database or external side effects.
-
 ## Output contract
 
-### Symptom
+Produce:
 
-Observed vs expected.
+- Symptom
+- Reproducer
+- Root Cause
+- Minimal Fix
+- Regression Protection
+- Recovery action when state restoration is needed
+- Fresh Verification
+- Durable Follow-up only where warranted
 
-### Reproducer
+## Boundaries
 
-Exact focused mechanism proving the failure.
+- Do not edit first when a reproducer is practical.
+- Do not shotgun multiple fixes in one experiment.
+- Do not accept "probably" as root cause.
+- Do not use remote CI as the only loop for a locally reproducible failure.
+- Do not assume application rollback reverses data or external side effects.
+- Do not use debugging to silently rewrite requirements.
+- For an active production incident, stabilize via incident-response first.
 
-### Root Cause
-
-Evidence-backed explanation.
-
-### Fix
-
-Minimal source correction.
-
-### Regression Protection
-
-Test/check that catches recurrence.
-
-### Recovery
-
-State restoration or operational action if needed.
-
-### Verification
-
-Fresh evidence from reproducer and affected scope.
-
-### Follow-up
-
-Only durable gaps that belong to another lifecycle owner.
-
-## Red flags
-
-- editing before reproducing when reproduction is feasible;
-- shotgun fixes;
-- multiple unrelated changes in one experiment;
-- "probably" accepted as root cause;
-- fixing symptom location without tracing origin;
-- CI used as the only debugging loop for a locally reproducible failure;
-- temporary logs left permanently by accident;
-- secrets/PII copied into debug output;
-- application rollback assumed to undo stateful side effects;
-- debugging used to silently rewrite requirements.
-
-## Completion check
+## Completion gate
 
 Before declaring recovery, confirm:
 
-- the failure was reproduced or the inability to reproduce is explicitly explained;
-- root cause is supported by evidence;
+- the failure was reproduced or the inability to reproduce is explicit;
+- root cause is evidence-backed;
 - the fix targets root cause;
 - regression protection exists where practical;
-- the original reproducer is green;
-- affected-scope verification is green;
+- the original reproducer and affected scope are green;
 - state recovery is verified when applicable;
 - temporary diagnostics are cleaned up;
-- contract changes, if needed, were escalated rather than hidden.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- mattpocock/skills — `skills/engineering/diagnosing-bugs/SKILL.md` — `diagnosing-bugs` — MIT
-- obra/superpowers — `skills/systematic-debugging/SKILL.md` — `systematic-debugging` — MIT
-- addyosmani/agent-skills — `skills/debugging-and-error-recovery/SKILL.md` — `debugging-and-error-recovery` — MIT
-
-This is an Anthracite-specific rewrite. Harness-specific debugging tools, fixed phase rituals, and foreign artifact storage are intentionally not inherited.
+- material contract changes were escalated.
