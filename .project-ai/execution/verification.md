@@ -1,10 +1,10 @@
 # Verification
 
-This file defines universal verification strategy. The actual project defines its real commands, toolchain, tests, build system, formatters, generated artifacts, and acceptance checks.
+This file defines universal verification strategy. The actual project defines its real commands, toolchain, tests, build system, formatters, generated artifacts, and verification checks.
 
 ## Core rule
 
-Full repository acceptance is a terminal verification step for a finished candidate. It is not the implementation feedback loop.
+Terminal repository verification is the final technical verification step for a finished candidate. It is not the implementation feedback loop.
 
 ## Implementation feedback loop
 
@@ -16,28 +16,28 @@ Typical progression:
 2. affected component, package, or module;
 3. affected subsystem when the narrower layer is green;
 4. broader repository checks only when evidence requires them;
-5. full repository acceptance on the finished candidate.
+5. terminal repository verification on the finished candidate.
 
 Do not repeatedly run the entire repository suite or remote CI while diagnosing a narrow failure if a smaller reproducer can provide faster, clearer evidence.
 
-## Terminal acceptance
+## Terminal repository verification
 
-Run complete repository acceptance only on a finished candidate.
+Run complete project-defined repository verification only on a finished candidate.
 
-Terminal acceptance must validate the candidate that is actually proposed for review. Any source or generated-state change after acceptance invalidates the previous acceptance result and creates a new candidate.
+Terminal repository verification must validate the candidate that is actually proposed for review. Any source or generated-state change after verification invalidates the previous terminal result and creates a new candidate.
 
-CI or verification must not silently mutate the candidate being accepted.
+CI or verification must not silently mutate the candidate being verified.
 
-## Terminal failure
+## Terminal verification failure
 
-If terminal acceptance fails:
+If terminal repository verification fails:
 
 1. identify the smallest useful reproducer for the failure;
-2. leave the terminal-acceptance loop;
+2. leave the terminal-verification loop;
 3. diagnose and fix narrowly;
 4. regain targeted green evidence;
 5. produce a new finished candidate;
-6. run terminal acceptance again.
+6. run terminal repository verification again.
 
 ## Distinct operation classes
 
@@ -48,10 +48,10 @@ Do not collapse unrelated work into a generic “run CI” action. Distinguish a
 - format/lint checks;
 - dependency-state generation;
 - generated contracts or schemas;
-- environment/toolchain capability;
+- environment/toolchain execution availability;
 - repository/provider administration;
 - security-specific verification;
-- terminal repository acceptance.
+- terminal repository verification.
 
 Dependency state should change only when the dependency graph actually changes.
 
