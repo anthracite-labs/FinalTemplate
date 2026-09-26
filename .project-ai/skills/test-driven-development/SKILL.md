@@ -109,7 +109,7 @@ Final candidate verification still follows the canonical verification strategy.
 - Do not accept a test that never demonstrated the bug or missing behavior when RED is feasible.
 - Do not couple tests unnecessarily to private internals.
 - Do not mock away the boundary whose behavior needs proof.
-- Do not run terminal repository acceptance on every TDD iteration.
+- Do not run terminal repository verification on every TDD iteration.
 - Do not force TDD onto documentation-only, generated, or purely mechanical changes where another check is more direct.
 
 ## Completion gate

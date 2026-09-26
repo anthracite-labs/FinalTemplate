@@ -13,7 +13,7 @@ Decide the outcome, scope, constraints, acceptance, real dependencies, sequencin
 
 ## Authority
 
-For Arena-dispatched product work, read `../../execution/arena-dispatch.md`. It owns Issue structure, dispatch eligibility, branch/PR lifecycle, contract exceptions, review, acceptance, and merge boundaries.
+For Arena-dispatched implementation work, read `../../execution/arena-dispatch.md`. It owns Issue structure, dispatch eligibility, branch/PR lifecycle, contract exceptions, review, acceptance, and merge boundaries.
 
 ## Workflow
 

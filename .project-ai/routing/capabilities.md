@@ -1,6 +1,13 @@
 # Capability Routing
 
-Classify work by what kind of reasoning or activity is required. Capability routing is separate from execution routing.
+Capability answers **what kind of work is required**.
+
+It is separate from:
+
+- **Skill** — the method used to perform the work.
+- **Route** — where or through what execution mechanism a required operation runs.
+- **Authority** — who may decide or act.
+- **Verification** — the evidence that proves the result.
 
 Use only these initial capabilities:
 
@@ -20,9 +27,11 @@ Plan only deeply enough to make execution safe and unambiguous. Do not pre-imple
 
 ## implement
 
-Use when approved product changes must be made.
+Use when approved changes must be made.
 
-Normal ChatGPT does not normally perform product implementation. Approved implementation is dispatched to Arena through the GitHub Issue contract defined in `../execution/arena-dispatch.md`.
+For project implementation, the control plane does not normally implement directly. Approved implementation is dispatched to Arena through the GitHub Issue contract defined in `../execution/arena-dispatch.md`.
+
+Control-plane maintenance remains owned by the control plane.
 
 ## review
 
@@ -32,9 +41,11 @@ Use when examining an implementation, change, evidence set, security concern, or
 
 Use when a failure, regression, unexpected result, or blocked operation requires root-cause investigation.
 
-## Cross-cutting concerns
+## Skills and cross-cutting concerns
 
-Testing, security, documentation, research, UI work, deployment, migrations, performance, and similar concerns are not additional top-level capabilities by default. They operate within the six capabilities above.
+Lifecycle skills are methods, not additional top-level capabilities.
+
+Testing, security, documentation, research, UI work, deployment, migrations, performance, and similar concerns operate within one or more of the six capabilities above.
 
 Create a new capability only when separating it materially changes routing, procedure, authority, permissions, or acceptance.
 

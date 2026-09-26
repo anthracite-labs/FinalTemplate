@@ -8,6 +8,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+FRONTMATTER_OPEN = "---\n"
+FRONTMATTER_CLOSE = "\n---\n"
+
 REQUIRED_HEADINGS = [
     "Purpose",
     "Workflow",
@@ -15,6 +18,7 @@ REQUIRED_HEADINGS = [
     "Boundaries",
     "Completion gate",
 ]
+
 BANNED_RUNTIME_MARKERS = [
     "## Provenance",
     "_bmad/",
@@ -23,24 +27,34 @@ BANNED_RUNTIME_MARKERS = [
     ".superpowers/",
 ]
 
+LEGACY_RUNTIME_TERMS = [
+    "Normal ChatGPT",
+    "Arena product work",
+    "Arena product PRs",
+    "full repository acceptance",
+    "terminal acceptance",
+    "terminal repository acceptance",
+]
+
 
 def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
-    if not text.startswith("---
-"):
+    if not text.startswith(FRONTMATTER_OPEN):
         raise ValueError("frontmatter must start on line 1")
-    end = text.find("
----
-", 4)
+
+    end = text.find(FRONTMATTER_CLOSE, len(FRONTMATTER_OPEN))
     if end == -1:
         raise ValueError("frontmatter closing delimiter not found")
-    raw = text[4:end]
-    body = text[end + 5 :]
+
+    raw = text[len(FRONTMATTER_OPEN) : end]
+    body = text[end + len(FRONTMATTER_CLOSE) :]
+
     fields: dict[str, str] = {}
     for line in raw.splitlines():
         if ":" not in line:
             continue
         key, value = line.split(":", 1)
         fields[key.strip()] = value.strip().strip('"').strip("'")
+
     return fields, body
 
 
@@ -99,6 +113,12 @@ def validate_skill(skill_dir: Path) -> list[str]:
                 f"{skill_dir.name}: runtime file contains maintenance/upstream marker {marker!r}"
             )
 
+    for term in LEGACY_RUNTIME_TERMS:
+        if term in text:
+            errors.append(
+                f"{skill_dir.name}: runtime file contains legacy control-plane term {term!r}"
+            )
+
     return errors
 
 
@@ -106,26 +126,28 @@ def main() -> int:
     skill_dirs = sorted(
         path
         for path in ROOT.iterdir()
-        if path.is_dir() and not path.name.startswith(".")
+        if path.is_dir() and (path / "SKILL.md").is_file()
     )
 
     errors: list[str] = []
     names: set[str] = set()
 
     for skill_dir in skill_dirs:
-        skill_errors = validate_skill(skill_dir)
-        errors.extend(skill_errors)
+        errors.extend(validate_skill(skill_dir))
 
         skill_file = skill_dir / "SKILL.md"
-        if skill_file.exists():
-            try:
-                fields, _ = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
-                name = fields.get("name", "")
-                if name in names:
-                    errors.append(f"{skill_dir.name}: duplicate skill name {name!r}")
-                names.add(name)
-            except ValueError:
-                pass
+        if not skill_file.exists():
+            continue
+
+        try:
+            fields, _ = parse_frontmatter(skill_file.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+
+        name = fields.get("name", "")
+        if name in names:
+            errors.append(f"{skill_dir.name}: duplicate skill name {name!r}")
+        names.add(name)
 
     if errors:
         print("Skill validation failed:")
