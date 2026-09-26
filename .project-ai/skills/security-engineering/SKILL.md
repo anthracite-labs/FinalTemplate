@@ -1,304 +1,149 @@
 ---
 name: security-engineering
-description: Apply risk-triggered security design, hardening, review, and audit. Model trust boundaries and abuse cases early, trace real attacker-controlled paths before reporting vulnerabilities, and scale audit depth to the project's actual risk surface.
+description: Use when work touches authentication, authorization, secrets, cryptography, untrusted input, uploads or parsing, network trust boundaries, privileged operations, multi-tenancy, payments, sensitive data, supply chain risk, privileged CI/CD, or an explicit security review or audit.
 ---
 
 # Security Engineering
 
 ## Purpose
 
-Security is a cross-cutting engineering concern, not a final checklist.
+Apply security depth in proportion to the actual risk surface.
 
-Use this skill to identify and control material security risk from architecture through implementation, review, release, and incident handling.
+Security starts with trust and abuse analysis, continues through implementation hardening, and becomes evidence-based review or audit when code exists.
 
-Security depth follows risk. Low-risk work should not inherit heavyweight ceremony. High-risk work must not be waved through with generic best-practice language.
+## Decision rules
 
-## Trigger conditions
+| Mode | Use it when | Goal |
+|---|---|---|
+| Design | requirements or architecture expose security-sensitive behavior | identify assets, principals, trust boundaries, abuse cases, required controls |
+| Hardening | implementing a security-sensitive surface | place secure controls at real boundaries |
+| Review | reviewing a specific change | trace concrete exploit paths before reporting findings |
+| Audit | explicitly requested or risk justifies deeper examination | systematically test trust-boundary violations and fixes |
 
-Invoke this skill when work materially involves any of:
-
-- authentication or authorization;
-- secrets, credentials, tokens, or key material;
-- cryptography;
-- untrusted input;
-- uploads, parsers, document processing, or deserialization;
-- network trust boundaries;
-- webhooks, callbacks, or external-service responses;
-- privileged operations or permissions;
-- multi-tenancy;
-- payments or money movement;
-- personal, regulated, or otherwise sensitive data;
-- dependency or supply-chain risk;
-- privileged CI/CD behavior;
-- code generation or execution from untrusted material;
-- LLM or agent output used to drive tools, code, queries, files, or other effects.
-
-Also invoke it when explicitly asked for a security review or audit.
-
-## Operating modes
-
-Choose the lightest mode that can safely answer the question.
-
-### Design mode
-
-Use during requirements or architecture.
-
-Goal: identify assets, principals, trust boundaries, abuse cases, and required controls before implementation hardens the wrong design.
-
-### Hardening mode
-
-Use during implementation.
-
-Goal: implement secure defaults and project-appropriate controls at actual boundaries.
-
-### Review mode
-
-Use on a specific change.
-
-Goal: find high-confidence exploitable problems by tracing real data and authorization flows, not by pattern matching.
-
-### Audit mode
-
-Use only when explicitly requested or when the risk surface justifies a deeper review.
-
-Goal: systematically inspect the relevant system for concrete trust-boundary violations, safe reproduction, impact, and smallest effective fixes.
-
-Do not run full-audit ceremony on unrelated low-risk changes.
+Use the lightest mode that can answer the question safely.
 
 ## Workflow
 
-### 1. Establish security scope
+### 1. Define scope, principals, assets, and trust boundaries
 
-State what is being secured and which security outcome matters.
+Identify:
 
-Identify relevant:
+- who can act;
+- what they can affect;
+- what is valuable or sensitive;
+- where less-trusted data or authority crosses into more-trusted code;
+- attacker capabilities relevant to the surface.
 
-- principals;
-- assets;
-- resources;
-- trust boundaries;
-- attacker capabilities;
-- sensitive operations;
-- externally controlled inputs;
-- privileged outputs or effects.
+Trust follows who can influence a value, not the channel that delivered it.
 
-Do not assume every boundary is HTTP or browser-based.
+### 2. Model abuse
 
-### 2. Model abuse cases
+For each material behavior, ask how it could be misused.
 
-For each material use case, ask how it could be misused.
-
-Consider as applicable:
+Consider as relevant:
 
 - impersonation;
 - authorization bypass;
 - tampering;
-- information disclosure;
+- disclosure;
 - replay or duplicate effects;
 - denial of service;
 - privilege escalation;
 - cross-tenant access;
-- unsafe file or path handling;
-- injection into interpreters, queries, templates, shells, or tool calls;
+- unsafe paths/files;
+- injection;
 - supply-chain compromise.
 
-Use threat-model frameworks such as STRIDE only when they help. The framework is a lens, not a required artifact.
+Use threat frameworks as lenses, not ceremony.
 
-### 3. Define controls at real boundaries
-
-Prefer controls placed where trust changes.
-
-Examples:
-
-- authenticate principals at the appropriate boundary;
-- authorize the specific action on the specific resource;
-- validate externally controlled data before trusted use;
-- parameterize interpreters and queries;
-- encode or sanitize output in the context where it is rendered;
-- minimize privileges;
-- isolate secrets from source and logs;
-- constrain externally triggered side effects;
-- cap size, rate, time, concurrency, or recursion where abuse could exhaust resources;
-- verify signatures or provenance where trust depends on them.
-
-Do not duplicate validation mechanically inside already trusted internal paths.
-
-### 4. Treat external and generated data as untrusted
-
-Third-party APIs, queues, files, model output, job payloads, environment supplied by less-trusted actors, and other external material can be attacker-controlled even when they arrive through an internal-looking channel.
-
-Trust follows who can influence a value, not the transport that delivered it.
-
-### 5. Review authentication and authorization separately
-
-Authentication answers who the principal is.
-
-Authorization answers whether that principal may perform this action on this resource.
-
-Do not treat successful authentication as authorization.
-
-For multi-tenant systems, explicitly verify tenant isolation at data and action boundaries.
-
-### 6. Handle secrets and sensitive data deliberately
+### 3. Put controls at real boundaries
 
 As applicable:
 
-- keep secrets out of source and logs;
-- minimize collection of sensitive data;
-- classify sensitive fields;
-- define retention and deletion behavior where required;
-- restrict access to least privilege;
-- avoid copying sensitive data into telemetry or debugging artifacts;
-- account for caches, backups, indexes, analytics, and downstream processors when deletion or residency matters.
+- authenticate principals;
+- authorize the specific action on the specific resource;
+- validate externally controlled data before trusted use;
+- parameterize interpreters and queries;
+- encode/sanitize at output boundaries;
+- minimize privileges;
+- constrain destructive or expensive side effects;
+- protect secrets;
+- cap size, rate, time, concurrency, or recursion;
+- verify signatures/provenance where trust depends on them.
 
-A secret exposed to a remote system or public history should be treated as compromised according to the project's incident procedure.
+Do not scatter redundant validation through already trusted internal paths.
 
-### 7. Consider dependencies and supply chain
+### 4. Handle sensitive data and dependencies deliberately
 
-For new or materially changed dependencies:
+For sensitive data, minimize collection, restrict access, keep secrets and unnecessary personal data out of logs, and account for retention/deletion obligations where relevant.
 
-- identify the owning package manager and lockfile;
-- inspect provenance and maintenance signals;
-- understand install/build scripts and privileged hooks;
-- review relevant advisories;
-- assess reachability before escalating advisory severity;
-- avoid forced broad upgrades without compatibility review;
-- preserve reproducible dependency state.
+For dependencies, identify the real package-manager/lockfile boundary, inspect advisories and provenance, consider reachability, and avoid forced broad upgrades without compatibility evidence.
 
-Do not equate "audit tool is green" with "dependency is safe".
+A green audit tool does not prove supply-chain safety.
 
-### 8. Review by tracing data flow
+### 5. Review by tracing real data and authority flow
 
-When reviewing code, investigate before reporting.
+Before reporting a vulnerability, establish:
 
-For each candidate finding, establish:
+- attacker-controlled input or action;
+- reachable path;
+- existing validation, authorization, sanitization, or framework protection;
+- affected principal/resource;
+- concrete security consequence.
 
-- where the input or action originates;
-- whether an attacker can control it;
-- validation, authorization, sanitization, or framework protections already present;
-- configuration that changes exploitability;
-- whether the vulnerable path is reachable;
-- the affected principal or resource;
-- the concrete security consequence.
+Classify findings:
 
-Do not report a vulnerability based only on a suspicious-looking API call.
+- **CONFIRMED** — exploit path and attacker control established;
+- **NEEDS VERIFICATION** — plausible material risk with unresolved exploit conditions;
+- **DEFENSE IN DEPTH** — improvement without a demonstrated exploit path.
 
-### 9. Grade confidence separately from impact
+### 6. Deep-audit only when warranted
 
-A high-impact theory with weak exploit evidence is not a high-confidence finding.
-
-Classify findings as:
-
-- **CONFIRMED** — concrete vulnerable path and attacker control are established;
-- **NEEDS VERIFICATION** — plausible material risk but one or more exploit conditions remain unproven;
-- **DEFENSE IN DEPTH** — improvement with no demonstrated exploit path.
-
-Do not inflate defense-in-depth advice into vulnerability findings.
-
-### 10. Deep-audit a real trust-boundary violation
-
-For full audit mode, each material finding should identify:
+For a full audit, each material finding should include:
 
 - attacker capability;
-- attacker-controlled input or action;
 - crossed trust boundary;
 - affected principal/resource;
-- security outcome;
+- impact;
 - safe reproduction or evidence;
 - severity rationale;
 - smallest effective fix;
-- verification for the fix.
+- verification requirement.
 
-Avoid unsafe reproduction that could damage data, systems, or users.
+Avoid reproduction that could damage users, data, or systems.
 
-### 11. Re-verify after correction
+### 7. Verify corrections
 
-Security fixes require targeted verification of the original exploit condition and relevant regression coverage.
-
-Use the canonical verification strategy in `../../execution/verification.md`.
+Re-test the original exploit condition or security property and run relevant regression checks using the canonical verification strategy.
 
 ## Output contract
 
-### Security Scope
+Produce only what the active mode requires:
 
-What was assessed and why security depth was triggered.
+- Security Scope
+- Material Assets / Principals / Trust Boundaries
+- Abuse Cases
+- Required Controls
+- Findings with confidence, evidence, impact, fix, and verification
+- Residual Risk
+- Material decisions requiring escalation
 
-### Assets / Principals / Trust Boundaries
+## Boundaries
 
-Only the material ones.
+- Do not run heavyweight audit ceremony on unrelated low-risk changes.
+- Do not report vulnerabilities from pattern matching alone.
+- Do not confuse authentication with resource-level authorization.
+- Do not log secrets or sensitive payloads for debugging.
+- Do not silently expand product scope to fix a material architecture or trust-boundary problem.
+- Do not let a passing dependency audit substitute for dependency provenance and reachability judgment.
 
-### Abuse Cases
-
-Relevant misuse paths and required controls.
-
-### Required Controls
-
-Controls that architecture or implementation must preserve.
-
-### Findings
-
-For each finding:
-
-- status: CONFIRMED / NEEDS VERIFICATION / DEFENSE IN DEPTH;
-- affected path or surface;
-- attacker preconditions;
-- evidence;
-- impact;
-- smallest effective fix;
-- verification requirement.
-
-### Residual Risk
-
-Known risk that remains accepted, deferred, or outside scope.
-
-### Escalation
-
-Material security decisions that require control-plane or human approval.
-
-## Interaction with other lifecycle skills
-
-- requirements specification captures security requirements that are part of product behavior;
-- architecture-interface-design establishes trust and ownership boundaries;
-- project-bootstrap establishes project-specific security foundations when needed;
-- ci-cd-automation protects privileged automation and supply chain;
-- code-review may invoke security review for changed risk surfaces;
-- incident-response handles active security incidents;
-- maintenance-migration-retirement removes obsolete vulnerable surfaces and dependencies.
-
-Security does not become a seventh top-level capability. It operates within understand, decide, plan, implement, review, and diagnose.
-
-## Red flags
-
-- "security later";
-- generic OWASP checklist with no project threat model;
-- authentication without resource-level authorization;
-- trusting third-party or model output because it came through an internal service;
-- vulnerability claims based only on pattern matching;
-- reporting theoretical issues as confirmed exploits;
-- logging secrets or sensitive payloads for debugging;
-- forced dependency remediation without compatibility analysis;
-- full penetration-test ceremony for low-risk documentation or mechanical changes;
-- suppressing a material security concern to preserve delivery scope.
-
-## Completion check
+## Completion gate
 
 Before handoff, confirm:
 
 - security depth matches the risk surface;
-- material trust boundaries and assets are known;
-- abuse cases were considered where relevant;
-- required controls are tied to real boundaries;
-- review findings trace attacker control to concrete impact;
-- uncertainty is not reported as confirmed vulnerability;
+- material trust boundaries and abuse paths are understood;
+- required controls map to real boundaries;
+- findings distinguish confirmed exploitation from uncertainty;
 - residual risk is explicit;
-- security fixes have targeted verification requirements.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- addyosmani/agent-skills — `skills/security-and-hardening/SKILL.md` — `security-and-hardening` — MIT
-- getsentry/skills — `skills/security-review/SKILL.md` — `security-review` — Apache-2.0
-- cloudflare/security-audit-skill — `skills/security-audit/SKILL.md` — `security-audit` — MIT
-
-This is an Anthracite-specific rewrite. Upstream web-framework defaults, tool lists, reference layouts, report formats, and audit orchestration are intentionally not inherited.
+- security fixes have targeted verification evidence.
