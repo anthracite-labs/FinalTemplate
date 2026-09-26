@@ -1,311 +1,135 @@
 ---
 name: requirements-specification
-description: Convert confirmed intent and relevant evidence into an approved, implementation-neutral requirement contract. Define why the work exists, required capabilities, functional and non-functional requirements, constraints, non-goals, acceptance signals, assumptions, and blocking open questions without pre-implementing the solution.
+description: Use when confirmed project or feature intent needs an approved behavioral contract defining required capabilities, applicable non-functional requirements, constraints, non-goals, acceptance signals, assumptions, and blocking open questions before design or implementation.
 ---
 
 # Requirements Specification
 
 ## Purpose
 
-Use this skill to define what must become true before architecture, planning, or implementation begins.
+Define what must become true without pre-implementing how it will be built.
 
-Requirements own the behavior, outcomes, constraints, and acceptance boundary. They do not own implementation design, task decomposition, or code.
-
-The specification should be only as detailed as necessary to make downstream decisions safe and testable.
-
-## Use when
-
-Use this skill when:
-
-- a project or feature has confirmed intent but no approved requirements;
-- vague goals need measurable success criteria;
-- multiple stakeholders or concerns need a shared contract;
-- a material change requires an explicit behavioral boundary before implementation;
-- an existing requirement contract needs reconciliation or validation.
-
-For trivial work, a few acceptance criteria may be sufficient. Do not create heavyweight specification ceremony for a tiny change.
-
-## Inputs and authority
-
-Use:
-
-- confirmed discovery intent;
-- relevant research and feasibility findings;
-- accepted project decisions;
-- existing project contracts and documentation;
-- current code/configuration for brownfield constraints.
-
-If the project already has a canonical specification or RFC system, use it. Do not create a parallel specification format merely because this skill exists.
-
-## Core principles
-
-1. Requirements describe **what** must be true, not unnecessary implementation detail.
-2. Vague instructions must become observable success conditions.
-3. Assumptions are surfaced before they become accidental requirements.
-4. Constraints must actually constrain downstream choices.
-5. Non-goals are explicit so downstream agents do not fill the vacuum.
-6. Every material capability needs a success or acceptance signal.
-7. Cross-cutting concerns are included when the product carries them, not because a template lists them.
-8. The contract must preserve all load-bearing discovery and research inputs.
-9. Planning and implementation are downstream.
+Requirements own the behavioral boundary, constraints, and acceptance signals. They do not own architecture, task decomposition, or code.
 
 ## Workflow
 
-### 1. Surface assumptions
+### 1. Load the accepted inputs
 
-Before drafting requirements, list any material assumptions that would otherwise be silently embedded.
+Use confirmed discovery intent, relevant research and feasibility findings, accepted project decisions, and existing project contracts.
 
-Resolve blocking assumptions with the user or mark them explicitly.
+If the project already has a canonical RFC or specification system, use it instead of creating a parallel format.
 
-Do not silently choose:
+### 2. Surface assumptions
 
-- platform;
-- technology;
-- storage;
-- deployment model;
-- authentication pattern;
-- performance target;
-- compatibility boundary;
-- user role;
-- workflow behavior.
+List material assumptions that would otherwise become accidental requirements.
 
-unless those are already authoritative project facts or accepted decisions.
+Do not silently choose technology, storage, deployment, authentication, performance targets, compatibility boundaries, or user roles unless they are already accepted facts.
 
-### 2. Establish why and who
+Resolve blocking assumptions before approval.
 
-State:
+### 3. State objective and user outcome
 
-- the problem or opportunity;
-- the user or stakeholder;
-- the desired outcome;
-- why the work matters.
+Capture:
 
-Keep this concise. Discovery owns the deeper reasoning; requirements preserve only what downstream work needs.
+- why the work exists;
+- who benefits;
+- what outcome they need.
 
-### 3. Define capabilities and functional requirements
+Keep only the discovery context downstream work needs.
 
-Describe what the system must allow, prevent, produce, or maintain.
+### 4. Define capabilities and functional requirements
 
-Prefer user-visible or contract-visible behavior over implementation structure.
+Describe what the system must allow, prevent, produce, or preserve.
 
-For larger scopes, group requirements by capability.
+Prefer observable behavior over implementation structure.
 
-Stable identifiers are useful when downstream traceability will materially benefit from them. They are not mandatory for tiny work.
+Use stable identifiers only when traceability materially benefits the work.
 
-### 4. Define non-functional and cross-cutting requirements
+### 5. Add applicable cross-cutting requirements
 
 Include only concerns the project actually carries, such as:
 
 - performance;
 - reliability or availability;
-- security;
-- privacy;
+- security or privacy;
 - accessibility;
 - compliance;
 - compatibility;
-- scalability;
 - observability;
 - data retention;
 - localization;
-- operational constraints;
-- public API or integration contracts.
+- external contracts.
 
 Make them measurable where practical.
 
-Do not add generic "must be scalable/secure/robust" language without an observable meaning.
+### 6. Define constraints and non-goals
 
-### 5. Define constraints
+A constraint must materially restrict solution space.
 
-Record decisions or external limits that materially restrict solution space.
+A non-goal explicitly bounds what this effort will not solve.
 
-Examples:
+Do not fill either section with decorative language.
 
-- existing platform or protocol that must remain compatible;
-- regulatory requirement;
-- approved dependency policy;
-- migration limitation;
-- supported environment;
-- data residency;
-- hard performance budget;
-- repository or provider constraint.
-
-A preference that rules out nothing is not a meaningful constraint.
-
-### 6. Define non-goals
-
-State what the work explicitly does not attempt to solve.
-
-At least one non-goal is usually valuable for non-trivial work.
-
-Do not invent arbitrary exclusions merely to satisfy a template.
-
-### 7. Define acceptance and success signals
+### 7. Define acceptance signals
 
 Translate each material requirement into evidence that can later be demonstrated, tested, inspected, or measured.
 
-Examples of acceptable forms:
+Prefer user-visible or contract-visible outcomes over implementation steps.
 
-- observable user behavior;
-- contract response;
-- measurable threshold;
-- successful integration behavior;
-- preserved compatibility;
-- explicit absence of prohibited behavior.
+### 8. Classify open questions
 
-Avoid acceptance criteria that merely restate implementation steps.
+Mark questions as:
 
-### 8. Capture open questions
-
-Classify open questions as:
-
-- **blocking** — architecture or implementation would be unsafe or materially ambiguous without an answer;
-- **deferred** — can safely remain unresolved until a later lifecycle point.
+- **BLOCKING** — design or implementation would be materially unsafe or ambiguous without an answer;
+- **DEFERRED** — can safely remain unresolved until a later lifecycle point.
 
 Resolve blockers before approval.
 
-### 9. Preservation check
+### 9. Run a preservation check and approve
 
-Walk the confirmed discovery and relevant research findings.
+Compare the draft with discovery and feasibility inputs.
 
-Ensure every load-bearing requirement, constraint, risk condition, and non-goal appears in the contract or is explicitly rejected/deferred.
+Ensure no load-bearing need, condition, constraint, or non-goal was silently lost.
 
-Do not silently lose qualitative constraints because they do not fit a template section.
-
-### 10. Approval
-
-The requirement contract must be understandable enough for the human to approve or correct without reading an implementation plan.
-
-Approval means the behavior boundary is accepted. It does not approve architecture or implementation choices that have not yet been made.
+Human approval accepts the behavioral contract, not architecture choices that have not yet been made.
 
 ## Output contract
 
-Use the following lean kernel.
+Use the lean kernel:
 
-### Objective / Why
+- Objective / Why
+- User Outcome
+- Capabilities / Functional Requirements
+- Applicable Non-functional / Cross-cutting Requirements
+- Constraints
+- Non-goals
+- Acceptance Criteria / Success Signals
+- Assumptions
+- Open Questions
 
-What must change and why.
+Add journeys, data requirements, external contracts, compatibility matrices, or similar detail only when they materially clarify the contract.
 
-### User Outcome
-
-Who benefits and what outcome they need.
-
-### Capabilities / Functional Requirements
-
-What behavior or capability must exist.
-
-### Non-functional / Cross-cutting Requirements
-
-Only applicable concerns.
-
-### Constraints
-
-Binding limits on downstream design.
-
-### Non-goals
-
-Explicit exclusions.
-
-### Acceptance Criteria / Success Signals
-
-Observable proof for the material requirements.
-
-### Assumptions
-
-Unverified beliefs still carried by the contract.
-
-### Open Questions
-
-Blocking and safely deferred questions.
-
-## Optional detail
-
-Add these only when they materially clarify the contract:
-
-- user journeys;
-- external interface requirements;
-- compliance requirements;
-- data requirements;
-- migration requirements;
-- performance budgets;
-- availability targets;
-- accessibility requirements;
-- compatibility matrices.
-
-Do not create sections merely because they are available.
+Store the approved contract in the artifact that owns the work: for example an existing spec/RFC system, durable project documentation, or a GitHub Issue for an executable unit.
 
 ## Boundaries
 
-Where useful, express operational boundaries as:
+- Do not turn requirements into implementation design.
+- Do not produce task lists or planning artifacts.
+- Do not mandate SPEC.md, a PRD, or a spec folder.
+- Do not duplicate project facts already owned by code or configuration.
+- Do not add generic non-functional requirements that have no observable meaning.
 
-- **Always** — actions or invariants downstream work must preserve;
-- **Ask first** — material choices requiring explicit approval;
-- **Never** — prohibited actions.
-
-Do not use this pattern to duplicate control-plane policy already owned elsewhere.
-
-## Artifact ownership
-
-This skill does not mandate `SPEC.md`, a PRD, a spec folder, or a tasks directory.
-
-Put the approved contract where the work is canonically owned.
-
-Examples:
-
-- GitHub Issue for an executable implementation unit;
-- existing RFC/specification system;
-- actual project documentation for durable project-level requirements;
-- a concise in-context contract for trivial work when no durable artifact is required.
-
-Avoid shadow requirement stores.
-
-## Handoff
-
-After approval:
-
-- architecture and interface design resolves durable structural decisions;
-- security engineering applies where risk triggers exist;
-- project bootstrap establishes a greenfield repository after foundational choices are accepted;
-- implementation planning later converts the accepted contract into executable slices.
-
-Do not perform those jobs inside this skill.
-
-## Red flags
-
-- coding before any clear acceptance boundary exists;
-- translating requirements into a detailed implementation plan;
-- silently choosing architecture or technology;
-- mandatory large specs for trivial work;
-- vague success language;
-- constraints that do not constrain;
-- missing non-goals on broad work;
-- treating assumptions as accepted facts;
-- losing research conditions during specification;
-- duplicating project facts already owned by code/configuration;
-- creating task lists from this skill.
-
-## Completion check
+## Completion gate
 
 Before handoff, confirm:
 
 - objective and user outcome are clear;
-- material capabilities are specified without unnecessary implementation detail;
-- applicable non-functional requirements are included and observable where possible;
+- material capabilities are implementation-neutral;
+- applicable cross-cutting requirements are measurable where practical;
 - constraints materially restrict downstream choices;
 - non-goals bound the scope;
-- acceptance criteria prove the required behavior;
+- acceptance signals prove required behavior;
 - assumptions are explicit;
 - blocking questions are resolved;
 - load-bearing discovery and research inputs were preserved;
 - the human has approved the behavioral contract.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- addyosmani/agent-skills — `skills/spec-driven-development/SKILL.md` — `spec-driven-development`
-- bmad-code-org/BMAD-METHOD — `skills/bmad-prd/SKILL.md` — `bmad-prd`
-- bmad-code-org/BMAD-METHOD — `skills/bmad-spec/SKILL.md` — `bmad-spec`
-
-These repositories were MIT-licensed when this skill was authored.
-
-This is an Anthracite-specific rewrite. Upstream spec-folder, PRD, memlog, capability-ID, task-file, ticketing, subagent, and workspace conventions are intentionally not inherited.
