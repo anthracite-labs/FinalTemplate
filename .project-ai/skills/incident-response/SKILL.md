@@ -1,39 +1,19 @@
 ---
 name: incident-response
-description: Respond to active production incidents by establishing impact, stabilizing or containing harm, using live telemetry and recent-change evidence, applying reversible evidence-driven mitigations, verifying user-facing recovery, and handing durable learning to postmortem work.
+description: Use when production has an active or credible outage, severe degradation, data-integrity failure, widespread dependency failure, security compromise, material SLO breach, or uncontrolled rollout impact that requires stabilization before ordinary debugging can proceed.
 ---
 
 # Incident Response
 
 ## Purpose
 
-During an active incident, restore safe service and limit harm.
+Limit active harm and restore safe service.
 
-Perfect explanation can wait when users, data, security, or availability are actively at risk.
-
-This skill is for live operational incidents, not ordinary local debugging.
-
-Use debugging-recovery inside the incident when root-cause analysis needs a focused reproducer.
-
-## Trigger
-
-Use this skill when there is active or credible production impact such as:
-
-- outage;
-- severe degradation;
-- elevated error rate;
-- data integrity failure;
-- queue or job failure affecting users;
-- widespread integration failure;
-- security compromise;
-- material availability or latency breach;
-- uncontrolled rollout impact.
-
-A normal bug with no active operational impact belongs in debugging-recovery.
+When users, data, security, or availability are actively at risk, stabilize first and pursue perfect explanation after the system is safe enough.
 
 ## Workflow
 
-### 1. Confirm the incident
+### 1. Confirm impact
 
 Establish:
 
@@ -41,230 +21,130 @@ Establish:
 - who or what is affected;
 - when it started or was detected;
 - current user/business/security impact;
-- whether impact is ongoing;
+- whether harm is ongoing;
 - evidence source.
 
-Do not declare severity from emotion or one noisy metric.
+Separate facts from hypotheses.
 
 ### 2. Classify severity by impact
 
-Use the project's existing incident taxonomy if one exists.
+Use the project's existing incident taxonomy.
 
-If none exists, reason from:
+If none exists, reason from blast radius, duration, data loss/corruption, security exposure, user impact, contractual/regulatory impact, and available workaround.
 
-- user impact;
-- data loss or corruption;
-- security exposure;
-- breadth/blast radius;
-- duration;
-- contractual or regulatory impact;
-- available workaround.
+Do not invent organizational response-time commitments.
 
-Do not invent response-time commitments that the organization has not adopted.
+### 3. Establish proportionate coordination
 
-### 3. Establish coordination appropriate to incident size
+For material incidents, make decision ownership, technical response, communications, and security/legal escalation clear.
 
-For material incidents, identify who is:
-
-- coordinating decisions;
-- performing technical investigation or mitigation;
-- communicating status;
-- handling security/legal/compliance escalation where relevant.
-
-A tiny team may combine roles. Do not create role ceremony that slows response.
+Small teams may combine roles. Do not add ceremony that slows response.
 
 ### 4. Establish live system state
 
-Use actual observability and provider evidence.
+Use actual telemetry and provider evidence.
 
 Check as relevant:
 
-- errors;
-- latency;
-- throughput;
-- SLO or health state;
-- queue depth or job failure;
-- infrastructure saturation;
+- errors, latency, throughput;
+- queues/jobs;
+- resource pressure;
 - dependency health;
-- alerts;
 - data integrity;
-- recent deployments and configuration changes.
+- alerts/SLOs;
+- recent deployments/configuration changes.
 
-Compare to known baseline where possible.
+Compare with known baseline where possible.
 
-Do not guess blast radius from one log line.
+### 5. Stabilize or contain harm
 
-### 5. Stabilize or contain immediate harm
+Choose the safest bounded mitigation likely to reduce impact: rollback, flag disable, traffic shift, destructive-job stop, isolation, load reduction, failover, or write pause as appropriate.
 
-When harm is ongoing, prefer the safest bounded mitigation that can reduce impact quickly.
-
-Examples:
-
-- roll back a suspect deployment;
-- disable a feature;
-- shift traffic;
-- stop a destructive job;
-- isolate a compromised credential or component;
-- reduce load;
-- fail over;
-- pause writes to protect integrity.
-
-For each intervention, state:
+For each action, state:
 
 - expected effect;
-- signal that confirms it worked;
-- recovery or reversal path where practical.
+- signal that will confirm it;
+- reversal/recovery path where practical.
 
 Random changes are not mitigation.
 
-### 6. Preserve evidence when needed
+### 6. Preserve evidence when required
 
-For security, fraud, data corruption, or other forensic-sensitive incidents, preserve relevant evidence before destructive cleanup when doing so does not worsen active harm.
+For security, fraud, data corruption, or forensic-sensitive incidents, preserve relevant evidence before destructive cleanup when doing so does not worsen active harm.
 
-Coordinate with security engineering for security incidents.
+Use `../security-engineering/SKILL.md` for suspected compromise.
 
-Do not copy sensitive data into ad-hoc chat or logs.
+### 7. Investigate enough to guide recovery
 
-### 7. Investigate enough root cause to guide mitigation
+Correlate symptoms with recent changes, dependencies, resources, data shape, tenants, and error patterns.
 
-Form evidence-based hypotheses.
+Use `../debugging-recovery/SKILL.md` when a focused reproducer/hypothesis loop is useful.
 
-Correlate:
+The active-response goal is enough understanding to restore safe service, not a complete postmortem.
 
-- recent changes;
-- failing dependencies;
-- error patterns;
-- resource pressure;
-- data changes;
-- tenant or request characteristics.
+### 8. Communicate factual state
 
-The immediate goal is enough understanding to restore safe service.
-
-Deep causal analysis can continue after stabilization.
-
-### 8. Communicate impact and state
-
-For incidents requiring stakeholder communication, keep updates factual:
+When stakeholder updates are warranted, report:
 
 - current status;
 - user impact;
 - mitigation in progress;
 - known uncertainty;
-- next update point if the organization uses one.
+- next update point if organizational practice requires one.
 
-Do not speculate about cause before evidence supports it.
+Do not present speculative cause as fact.
 
-Do not bury active impact under implementation detail.
+### 9. Verify recovery
 
-### 9. Verify recovery from user-facing signals
+Confirm from user/system signals:
 
-Recovery requires more than a command completing.
-
-Verify:
-
-- affected user or API path works;
-- error rate returns toward expected baseline;
-- latency/throughput recover where relevant;
-- queues drain or jobs resume;
+- affected path works;
+- error/latency/throughput recover as relevant;
+- queues/jobs resume or drain;
 - data integrity is acceptable;
-- no new critical alert indicates continued impact.
+- no critical signal shows continuing impact.
 
-### 10. Monitor for recurrence
+### 10. Monitor and close active response
 
-After immediate recovery, observe long enough to establish that the mitigation is stable according to project risk.
+Observe long enough to establish stability based on project risk, not a universal timer.
 
-Do not use an arbitrary universal monitoring window.
+Close active response when impact is resolved or accepted degraded mode is stable, residual risks are known, temporary mitigations are tracked, and remaining work has an owner.
 
-### 11. Close active response
-
-Close the active incident when:
-
-- immediate impact is resolved or accepted degraded mode is stable;
-- ongoing risks are known;
-- temporary mitigations are documented or tracked;
-- ownership of remaining work is clear;
-- evidence needed for learning is preserved.
-
-Then hand off to postmortem-learning when the event has meaningful learning value.
-
-## Security incident branch
-
-When compromise is suspected:
-
-- invoke security-engineering;
-- contain attacker access or exposed credentials;
-- preserve evidence;
-- identify affected principals/resources;
-- avoid destroying forensic data unnecessarily;
-- consider notification, privacy, legal, or regulatory obligations using appropriate authoritative guidance.
-
-Security incidents may require stricter communication channels and access control than ordinary outages.
+Hand meaningful learning to postmortem-learning.
 
 ## Output contract
 
-### Incident State
+Produce:
 
-Active, mitigating, monitoring, or resolved.
+- Incident State
+- Impact / Blast Radius
+- Evidence
+- Mitigations and observed effects
+- Current evidence-backed hypothesis
+- Recovery Verification
+- Residual Risk
+- Handoff / Follow-up
 
-### Impact
+## Boundaries
 
-Affected users/systems/data and current blast radius.
+- Do not chase perfect root cause while active harm continues.
+- Do not make random changes without an expected observable effect.
+- Do not roll back blindly across stateful/data changes.
+- Do not infer blast radius from a single signal.
+- Do not communicate speculative cause as fact.
+- Do not expose sensitive incident evidence broadly.
+- Do not close an incident because deployment succeeded while user signals remain bad.
+- Do not escalate ordinary non-production bugs into incident process.
 
-### Evidence
-
-Telemetry and operational facts supporting the assessment.
-
-### Actions
-
-Mitigations attempted, expected effect, and observed result.
-
-### Current Hypothesis
-
-Only as strong as evidence permits.
-
-### Recovery Verification
-
-Signals proving service is safe enough to leave active response.
-
-### Remaining Risk
-
-Temporary mitigations, degraded behavior, unresolved root cause, or follow-up.
-
-### Handoff
-
-Postmortem, security investigation, maintenance work, or ordinary debugging as appropriate.
-
-## Red flags
-
-- random changes without expected effect;
-- chasing perfect root cause while damage continues;
-- rollback performed without considering data or external side effects;
-- one metric treated as full blast-radius evidence;
-- speculative cause communicated as fact;
-- sensitive evidence pasted into broad channels;
-- incident closed when deploy succeeded but user signals remain bad;
-- mandatory heavyweight incident roles for tiny events;
-- ordinary bugs escalated into incident process without operational impact.
-
-## Completion check
+## Completion gate
 
 Before ending active response, confirm:
 
 - impact and blast radius are evidence-based;
 - ongoing harm is contained or resolved;
 - mitigation effects were observed;
-- user-facing/system health is verified;
-- security evidence was preserved where required;
+- user/system health is verified;
+- sensitive evidence was preserved where required;
 - temporary mitigations and residual risk are tracked;
 - remaining diagnostic work has an owner;
-- meaningful learning is handed to postmortem-learning.
-
-## Provenance
-
-Upstream mechanisms studied:
-
-- wshobson/agents — plugins/incident-response/skills/incident-runbook-templates/SKILL.md — incident-runbook-templates — MIT
-- tomzx/agents — skills/observe-production/SKILL.md — observe-production — MIT
-- sickn33/agentic-awesome-skills — skills/incident-response/SKILL.md — incident-response — MIT; the skill declares a community source in BagelHole/DevOps-Security-Agent-Skills
-
-This is a substantial Anthracite rewrite. Fixed severity response times, mandatory runbook templates, .sdlc context, vendor-specific commands, and security-only incident framing are intentionally not inherited.
+- meaningful learning is handed off.
