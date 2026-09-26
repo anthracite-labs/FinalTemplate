@@ -46,7 +46,7 @@ Arena:
 - does not silently decide unresolved project-level bootstrap choices;
 - follows `../execution/arena-dispatch.md` for implementation authority, branch/PR lifecycle, verification reporting, and contract exceptions.
 
-Control-plane files remain control-plane-owned. Arena does not change the control plane unless a separate explicit control-plane workflow authorizes that work.
+Control-plane files remain control-plane-owned. Arena does not change the control plane.
 
 Human acceptance remains the final authority before merge.
 
