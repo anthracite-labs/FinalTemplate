@@ -1,10 +1,10 @@
 # Arena Dispatch and Review Lifecycle
 
-This file owns the complete lifecycle for product implementation dispatched to Arena.
+This file owns the complete lifecycle for project implementation dispatched to Arena.
 
-Normal ChatGPT owns understanding, decisions, planning, dispatch, control-plane maintenance, and contract review.
+The control plane owns understanding, decisions, planning, dispatch, control-plane maintenance, and contract review.
 
-Arena owns product implementation inside an approved contract.
+Arena owns project implementation inside an approved contract.
 
 Human acceptance remains the final authority before merge.
 
@@ -13,7 +13,7 @@ Human acceptance remains the final authority before merge.
 Dispatch only when:
 
 - the desired outcome is understood;
-- material product/architecture decisions required for the work are accepted;
+- material project/architecture decisions required for the work are accepted;
 - scope and non-goals are bounded;
 - acceptance criteria are observable;
 - the work can be expressed as one sensible reviewable implementation unit.
@@ -54,7 +54,7 @@ State observable conditions that must be true when the work is finished.
 
 ### Verification
 
-State required targeted checks and the expected terminal repository acceptance.
+State required targeted checks and the expected terminal repository verification.
 
 Use project-owned commands and artifacts rather than inventing generic stack commands.
 
@@ -137,7 +137,7 @@ Concise description of what was actually changed.
 
 ### Verification
 
-List targeted checks and their results, plus terminal repository acceptance and its result.
+List targeted checks and their results, plus terminal repository verification and its result.
 
 ### Scope
 
@@ -149,13 +149,13 @@ State any deliberate difference, limitation, or incomplete requirement. Write `N
 
 ### Review Notes
 
-Identify anything normal ChatGPT or the human should inspect particularly closely.
+Identify anything the control plane or the human should inspect particularly closely.
 
 Do not turn the PR into an implementation diary. Final evidence and unresolved limitations matter; every exploratory command does not.
 
-## 8. ChatGPT contract review
+## 8. Control-plane contract review
 
-Normal ChatGPT reviews the PR against the active Issue revision and available technical evidence.
+The control plane reviews the PR against the active Issue revision and available technical evidence.
 
 The only contract-review outcomes are:
 
@@ -181,7 +181,7 @@ Return to the control plane/human instead of expanding the correction loop.
 
 Implementation miss:
 
-`same contract → bounded correction → targeted verification → new finished candidate → terminal acceptance → contract review`
+`same contract → bounded correction → targeted verification → new finished candidate → terminal repository verification → contract review`
 
 Contract flaw:
 
@@ -196,7 +196,7 @@ Keep these states distinct:
 `VERIFIED ≠ CONTRACT-COMPLIANT ≠ ACCEPTED ≠ MERGED`
 
 - Arena establishes technical verification evidence.
-- Normal ChatGPT determines contract compliance.
+- The control plane determines contract compliance.
 - The human gives final acceptance.
 - Arena never merges its own work.
 - After explicit human acceptance, the merge may be performed mechanically by an authorized GitHub actor.
